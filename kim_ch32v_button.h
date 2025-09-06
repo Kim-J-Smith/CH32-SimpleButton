@@ -5,7 +5,7 @@
  * 
  * @brief           Kim Library to offer a template for button [CH32V]
  * 
- * @version         0.0.1 Beta ( 0001L )
+ * @version         0.0.2 ( 0002L )
  *                  (match with ch32vxxx.h)
  * 
  * @date            2025-09-06
@@ -19,7 +19,7 @@
 # include <stdint.h>
 
 #if         ( !defined(KIM_CH32V_BUTTON_H) ) && defined(__riscv)
-#define     KIM_CH32V_BUTTON_H      0001L
+#define     KIM_CH32V_BUTTON_H      0002L
 
 /* ============ Users can customize these by themselves ============ */
 
@@ -94,6 +94,22 @@
 
 /***** Macro for GPIO read pin *****/
 #define KIM_BUTTON_READ_PIN(GPIOx_BASE, PIN)        GPIO_ReadInputDataBit((GPIO_TypeDef*)(GPIOx_BASE), PIN)
+
+/***** Macro for replace Delay_xxx *****/
+#if (!defined(KIM_DELAY_MS)) && (!defined(KIM_DELAY_US))
+    #define KIM_DELAY_MS(time_ms)                                   \
+        do {                                                        \
+            uint64_t cmp = time_ms * (SystemCoreClock / 8000);      \
+            uint64_t stamp = SysTick->CNT;                          \
+            while(SysTick->CNT - stamp < cmp);                      \
+        } while(0U)
+    #define KIM_DELAY_US(time_us)                                   \
+        do {                                                        \
+            uint64_t cmp = time_us * (SystemCoreClock / 8000000);   \
+            uint64_t stamp = SysTick->CNT;                          \
+            while(SysTick->CNT - stamp < cmp);                      \
+        } while(0U)
+#endif /* delay */
 
 /** @p ------------------------------------------------------------- */
 /** @b NAMESPACE-NAME-PREFIX */

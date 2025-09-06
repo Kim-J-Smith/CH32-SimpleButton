@@ -10,3 +10,4 @@
 
 * 作为项目[STM32-SimpleButton](https://github.com/Kim-J-Smith/STM32-SimpleButton)针对CH32V系列芯片的深度定制版本，定制方法遵循[Developer-Guide](https://github.com/Kim-J-Smith/STM32-SimpleButton/blob/main/Developer_Guide.md)。
 
+* 【注意】该项目会与ch32v系列自带的Delay_xxx()函数冲突，项目提供了 **KIM_DELAY_MS()** 和 **KIM_DELAY_US()** 宏函数来代替
