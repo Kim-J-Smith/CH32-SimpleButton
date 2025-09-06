@@ -21,6 +21,10 @@
 #if         ( !defined(KIM_CH32V_BUTTON_H) ) && defined(__riscv)
 #define     KIM_CH32V_BUTTON_H      0002L
 
+/* ================================================================================ */
+/**    @b ATTENTION Kim_Button use SysTick, which conflicts with with Delay_xxx    **/
+/* ================================================================================ */
+
 /* ============ Users can customize these by themselves ============ */
 
 /** @p ------------------------------------------------------------- */
