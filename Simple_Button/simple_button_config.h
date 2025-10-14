@@ -174,6 +174,8 @@ void simpleButton_Private_InitEXTI(
     simpleButton_Type_GPIOPin_t     GPIO_Pin_X,
     simpleButton_Type_EXTITrigger_t EXTI_Trigger_X
 ) {
+    /* Init the time base */
+    HAL_InitTick();
     
     /* Initialize the GPIOx Clock */
     GPIO_InitTypeDef gpio_config;    
@@ -323,9 +325,10 @@ void simpleButton_Private_InitEXTI(
     NVIC_Init(&nvic_config);
 }
 
-void simpleButton_debug_panic(const char* cause)
+static inline void simpleButton_debug_panic(const char* cause)
 {
     (void)cause;
+    while(1);
 }
 
 /* ================================ END ================================ */

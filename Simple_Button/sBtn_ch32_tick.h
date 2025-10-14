@@ -25,10 +25,16 @@
 // # include "ch32v20x.h"
 // # include "ch32v30x.h"
 
-extern void HAL_InitTick(void);
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-extern uint32_t HAL_GetTick(void);
+void HAL_InitTick(void);
+uint32_t HAL_GetTick(void);
+void HAL_Delay(uint32_t Delay);
 
-extern void HAL_Delay(uint32_t Delay);
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* SIMPLEBUTTON_CH32_TICK_H__ */

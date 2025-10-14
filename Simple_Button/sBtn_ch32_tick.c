@@ -18,6 +18,10 @@
  */
 #include    "sBtn_ch32_tick.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 /* WEAK */
 #if defined(__GNUC__) || defined(__clang__)
  #define WEAK   __attribute__((weak))
@@ -29,10 +33,16 @@
 
 #if defined(__riscv)
 
- /* This CH32 chip may use Qingke RISCV Arch */
+ /* This CH32 chip may use Qingke core with RISCV Arch */
 
  /* static global variable */
  static uint32_t g_systick_div = 0;
+
+ #define SIMPLEBTN_SYSTICK_NOT_INIT 0
+
+ #define SIMPLEBTN_SYSTICK_IS_INIT  0x55
+
+ static uint8_t g_systick_is_init = SIMPLEBTN_SYSTICK_NOT_INIT;
 
  /**
   * @brief  This function configures the source of the time base.
@@ -44,6 +54,10 @@
   */
  WEAK void HAL_InitTick(void)
  {
+    if (g_systick_is_init == SIMPLEBTN_SYSTICK_IS_INIT) {
+        return; /* has been initialized */
+    }
+
     /* SysTick configure */
     const uint32_t SysTick_Msk_Mode = (uint32_t)(1U << 4);
     const uint32_t SysTick_Msk_STCLK = (uint32_t)(1U << 2);
@@ -60,6 +74,8 @@
 
     /* Init the global var */
     g_systick_div = (SystemCoreClock / (SysTick_Msk_STCLK ? (8000) : (1000)));
+
+    g_systick_is_init = SIMPLEBTN_SYSTICK_IS_INIT;
  }
 
  /**
@@ -82,3 +98,8 @@
  }
 
 #endif /* defined(__riscv) */
+
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
