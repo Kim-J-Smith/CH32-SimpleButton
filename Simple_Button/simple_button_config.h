@@ -43,6 +43,8 @@
  * 
  * 7. @e Initialization-Function (To init the GPIO, EXTI, NVIC/PFIC, etc)
  * 
+ * 8. @e NVIC-EXTI-Priority (To specify the Priority of button)
+ * 
  *************************************************************************
  */
 
@@ -142,6 +144,14 @@ typedef EXTITrigger_TypeDef simpleButton_Type_EXTITrigger_t;
 /* This macro just forward the parameter to another function */
 #define SIMPLEBTN_FUNC_INIT_EXTI(GPIOX_Base, GPIO_Pin_X, EXTI_Trigger_X) \
     simpleButton_Private_InitEXTI(GPIOX_Base, GPIO_Pin_X, EXTI_Trigger_X)
+
+
+/** @b ================================================================ **/
+/** @b NVIC-EXTI-Priority */
+
+#define SIMPLEBTN_NVIC_EXTI_PreemptionPriority      0
+
+#define SIMPLEBTN_NVIC_EXTI_SubPriority             0
 
 /* ====================== CUSTOMIZATION END ============================ */
 /** @p ================================================================ **/
@@ -307,8 +317,8 @@ void simpleButton_Private_InitEXTI(
     exti_config.EXTI_LineCmd = ENABLE;
     EXTI_Init(&exti_config);
 
-    nvic_config.NVIC_IRQChannelPreemptionPriority = 0;
-    nvic_config.NVIC_IRQChannelSubPriority = 0;
+    nvic_config.NVIC_IRQChannelPreemptionPriority = SIMPLEBTN_NVIC_EXTI_PreemptionPriority;
+    nvic_config.NVIC_IRQChannelSubPriority = SIMPLEBTN_NVIC_EXTI_SubPriority;
     nvic_config.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&nvic_config);
 }

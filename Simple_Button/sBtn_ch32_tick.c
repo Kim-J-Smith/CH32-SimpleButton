@@ -35,9 +35,12 @@
  static uint32_t g_systick_div = 0;
 
  /**
-  * @brief 
+  * @brief  This function configures the source of the time base.
   * 
-  * @return WEAK 
+  * @note   The function is declared as WEAK to be overwritten  in case of other
+  *         implementation  in user file.
+  * 
+  * @return None 
   */
  WEAK void HAL_InitTick(void)
  {
@@ -60,12 +63,22 @@
  }
 
  /**
-  * @brief 
+  * @brief  Provides a tick value in millisecond.
   * 
+  * @note   The function is declared as WEAK to be overwritten  in case of other
+  *         implementation  in user file.
+  * 
+  * @return tick value.
   */
-  WEAK uint32_t HAL_GetTick(void)
-  {
+ WEAK uint32_t HAL_GetTick(void)
+ {
     return (uint32_t) (SysTick->CNT / g_systick_div);
-  }
+ }
+
+ WEAK void HAL_Delay(uint32_t Delay)
+ {
+    uint32_t current = HAL_GetTick();
+    while (HAL_GetTick() - current < Delay);
+ }
 
 #endif /* defined(__riscv) */

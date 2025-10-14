@@ -29,4 +29,6 @@ extern void HAL_InitTick(void);
 
 extern uint32_t HAL_GetTick(void);
 
+extern void HAL_Delay(uint32_t Delay);
+
 #endif /* SIMPLEBUTTON_CH32_TICK_H__ */
