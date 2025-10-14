@@ -85,7 +85,7 @@ typedef EXTITrigger_TypeDef simpleButton_Type_EXTITrigger_t;
     __enable_irq()
 
 #define SIMPLEBTN_FUNC_START_LOW_POWER() \
-    __WFI()
+    simpleButton_start_low_power()
 
 /** @b ================================================================ **/
 /** @b Time-Set */
@@ -113,19 +113,19 @@ typedef EXTITrigger_TypeDef simpleButton_Type_EXTITrigger_t;
 /** @b Mode-Set */
 
     // Enable debug mode if this macro is defined as 1.
-#define SIMPLEBTN_MODE_ENABLE_DEBUG                     1
+#define SIMPLEBTN_MODE_ENABLE_DEBUG                     0
     // Enable combination mode if this macro is defined as 1.
-#define SIMPLEBTN_MODE_ENABLE_COMBINATION               1
+#define SIMPLEBTN_MODE_ENABLE_COMBINATION               0
     // Enable timer long-push mode if this macro is defined as 1.
-#define SIMPLEBTN_MODE_ENABLE_TIMER_LONG_PUSH           1
+#define SIMPLEBTN_MODE_ENABLE_TIMER_LONG_PUSH           0
     // Enable counter repeat-push mode if this macro is defined as 1.
-#define SIMPLEBTN_MODE_ENABLE_COUNTER_REPEAT_PUSH       1
+#define SIMPLEBTN_MODE_ENABLE_COUNTER_REPEAT_PUSH       0
     // Enable adjustable mode if this macro is defined as 1.
-#define SIMPLEBTN_MODE_ENABLE_ADJUSTABLE_TIME           1
+#define SIMPLEBTN_MODE_ENABLE_ADJUSTABLE_TIME           0
     // Enable multi-threads mode(enable this only when you do use multi-thread) if this macro is defined as 1.
-#define SIMPLEBTN_MODE_ENABLE_MULTI_THREADS             1
+#define SIMPLEBTN_MODE_ENABLE_MULTI_THREADS             0
     // Enable long-push-hold mode if this macro is defined as 1.
-#define SIMPLEBTN_MODE_ENABLE_LONGPUSH_HOLD             1
+#define SIMPLEBTN_MODE_ENABLE_LONGPUSH_HOLD             0
 
 /** @b ================================================================ **/
 /** @b Namespace */
@@ -329,6 +329,17 @@ static inline void simpleButton_debug_panic(const char* cause)
 {
     (void)cause;
     while(1);
+}
+
+SIMPLEBTN_FORCE_INLINE void simpleButton_start_low_power(void)
+{
+    /* We will disable gloabal irq before go into low power mode.
+     * So, use follow 2 line code can make EXTI-pending be able to wake up CPU.
+     */
+    const uint32_t Mask_IRQ_CanWake_WithoutGlobalEnable = 1 << 4;
+    NVIC->SCTLR |= Mask_IRQ_CanWake_WithoutGlobalEnable;
+
+    __WFE();
 }
 
 /* ================================ END ================================ */
