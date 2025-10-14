@@ -103,6 +103,8 @@
 
 #### Step 1
 
+- **Derivative projects can skip "Step 1"**
+
 1. Add head file in **Head-File** at the beginning of the file `simple_button_config.h`. The added header files depend on the specific chip. The following takes the HAL library of STM32F103C8T6 as an example:
 
 ```c
