@@ -178,36 +178,96 @@ void simpleButton_Private_InitEXTI(
     HAL_InitTick();
     
     /* Initialize the GPIOx Clock */
-    GPIO_InitTypeDef gpio_config;    
-    uint8_t PortSource;         
-    uint8_t PinSource;          
-    uint32_t EXTI_Line;         
+    GPIO_InitTypeDef gpio_config;
     EXTI_InitTypeDef exti_config;    
     NVIC_InitTypeDef nvic_config;
+    uint8_t PortSource;         
+    uint8_t PinSource;          
+    uint32_t EXTI_Line;
+    uint32_t RCC_GPIOX;
                 
     /* static constexpr assign values to variables */
     switch(GPIOX_Base)
-    {         
-    case GPIOA_BASE:            
-        PortSource = GPIO_PortSourceGPIOA;                                                          \
+    {
+    case GPIOA_BASE:
+        PortSource = GPIO_PortSourceGPIOA;
+        RCC_GPIOX = RCC_APB2Periph_GPIOA;
         break;
-    case GPIOB_BASE:            
-        PortSource = GPIO_PortSourceGPIOB;                                                          \
+    case GPIOB_BASE:
+        PortSource = GPIO_PortSourceGPIOB;
+        RCC_GPIOX = RCC_APB2Periph_GPIOB;
         break;
-    case GPIOC_BASE:            
-        PortSource = GPIO_PortSourceGPIOC;                                                          \
+    case GPIOC_BASE:
+        PortSource = GPIO_PortSourceGPIOC;
+        RCC_GPIOX = RCC_APB2Periph_GPIOC;
         break;
-    case GPIOD_BASE:            
-        PortSource = GPIO_PortSourceGPIOD;                                                          \
+    case GPIOD_BASE:
+        PortSource = GPIO_PortSourceGPIOD;
+        RCC_GPIOX = RCC_APB2Periph_GPIOD;
         break;
-    case GPIOE_BASE:            
-        PortSource = GPIO_PortSourceGPIOE;                                                          \
+    case GPIOE_BASE:
+        PortSource = GPIO_PortSourceGPIOE;
+        RCC_GPIOX = RCC_APB2Periph_GPIOE;
         break;
-    default:  
-        /* ... error handler ... */  
+#if defined(GPIOF_BASE)
+    case GPIOF_BASE:
+        PortSource = GPIO_PortSourceGPIOF;
+        RCC_GPIOX = RCC_APB2Periph_GPIOF;
         break;
-    }         
-                
+#endif /* defined(GPIOF_BASE) */
+#if defined(GPIOG_BASE)
+    case GPIOG_BASE:
+        PortSource = GPIO_PortSourceGPIOG;
+        RCC_GPIOX = RCC_APB2Periph_GPIOG;
+        break;
+#endif /* defined(GPIOG_BASE) */
+#if defined(GPIOH_BASE)
+    case GPIOH_BASE:
+        PortSource = GPIO_PortSourceGPIOH;
+        RCC_GPIOX = RCC_APB2Periph_GPIOH;
+        break;
+#endif /* defined(GPIOH_BASE) */
+#if defined(GPIOI_BASE)
+    case GPIOI_BASE:
+        PortSource = GPIO_PortSourceGPIOI;
+        RCC_GPIOX = RCC_APB2Periph_GPIOI;
+        break;
+#endif /* defined(GPIOI_BASE) */
+#if defined(GPIOJ_BASE)
+    case GPIOJ_BASE:
+        PortSource = GPIO_PortSourceGPIOJ;
+        RCC_GPIOX = RCC_APB2Periph_GPIOJ;
+        break;
+#endif /* defined(GPIOJ_BASE) */
+#if defined(GPIOK_BASE)
+    case GPIOK_BASE:
+        PortSource = GPIO_PortSourceGPIOK;
+        RCC_GPIOX = RCC_APB2Periph_GPIOK;
+        break;
+#endif /* defined(GPIOK_BASE) */
+#if defined(GPIOL_BASE)
+    case GPIOL_BASE:
+        PortSource = GPIO_PortSourceGPIOL;
+        RCC_GPIOX = RCC_APB2Periph_GPIOL;
+        break;
+#endif /* defined(GPIOL_BASE) */
+#if defined(GPIOM_BASE)
+    case GPIOM_BASE:
+        PortSource = GPIO_PortSourceGPIOM;
+        RCC_GPIOX = RCC_APB2Periph_GPIOM;
+        break;
+#endif /* defined(GPIOM_BASE) */
+#if defined(GPION_BASE)
+    case GPION_BASE:
+        PortSource = GPIO_PortSourceGPION;
+        RCC_GPIOX = RCC_APB2Periph_GPION;
+        break;
+#endif /* defined(GPION_BASE) */
+    default:
+        SIMPLEBTN_FUNC_PANIC("unexpected GPIO port", , );
+        break;
+    }
+
     switch(GPIO_Pin_X)
     {         
     case GPIO_Pin_0:            
@@ -291,17 +351,12 @@ void simpleButton_Private_InitEXTI(
         nvic_config.NVIC_IRQChannel = EXTI15_10_IRQn;                                               \
         break;
     default:  
-        /* ... error handler ... */
+        SIMPLEBTN_FUNC_PANIC("unexpected GPIO pin", , );
         break;
     }
 
     /* GPIO & AFIO Init */
-    RCC_APB2PeriphClockCmd( ((GPIOX_Base == GPIOA_BASE)
-        * RCC_APB2Periph_GPIOA + (GPIOX_Base == GPIOB_BASE)
-        * RCC_APB2Periph_GPIOB + (GPIOX_Base == GPIOC_BASE)
-        * RCC_APB2Periph_GPIOC + (GPIOX_Base == GPIOD_BASE)
-        * RCC_APB2Periph_GPIOD + (GPIOX_Base == GPIOE_BASE)
-        * RCC_APB2Periph_GPIOE), ENABLE );
+    RCC_APB2PeriphClockCmd(RCC_GPIOX, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 
     gpio_config.GPIO_Pin    = GPIO_Pin_X;
