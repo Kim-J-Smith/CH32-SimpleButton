@@ -33,13 +33,42 @@
 
 - Derivative projects are advised to keep all files except `examples/` for the project.
 
-- where `README.md` and `README_zh.md` are recommended to be moved to `docs/`, and the root directory provides your projects `README.md`.
+- The original `docs/` directory was nested as `docs/docs/`, and the original `README.md` and `README_zh.md` were recommended to be moved to `docs/`. The root directory provides your project's `README.md`.
 
 - It is recommended to change the `LICENSE` filename to `LICENSE-original` and add your `LICENSE` to the root directory.
 
 - For files in the `Simple_Button/` directory, it is recommended that you only modify `simple_button_config.h`. If you have another extension, you can create a new file in this directory.
 
 - When modifying `simple_button_config.h`, you can add your project version number macro. Macro names are recommended to start with `SIMPLEBUTTON_` and end with `VERSION`.
+
+- In the `Simple_Button/` directory, the files you newly added are recommended to start with `sBtn_`. Use `SIMPLEBUTTON_XXX_H__` to manage your header files. 
+
+- Finally, the directory structure of the derivative projects is as follows: 
+
+```
+.
+|
++-- docs/  # Documentation
+|       |
++       +-- docs/  # Origin README, LICENSE
+|       |
++       +-- ...  # Other documents
+|
++-- examples/  # Example code
+|
++-- Simple_Button/  # main code of the project
+|       |
++       +- sBtn_xxx  # Your new file
+|       |
++       +- Simple_Button.c / Simple_Button.h / simple_button_config.h
+|
++-- .gitattributes  # Help display files
+|
++-- LICENSE  # Your new license
+|
++-- README.md/README_zh.md  # Your project description in English or Chinese
+```
+
 
 ## Function Naming Conventions
 

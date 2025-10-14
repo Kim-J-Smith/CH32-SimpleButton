@@ -866,7 +866,7 @@ int main(void) {
 
 ### CH32
 
-- [标准库-Kim-J-Smith/CH32-SimpleButton]()(敬请期待)
+- [标准库-Kim-J-Smith/CH32-SimpleButton](https://github.com/Kim-J-Smith/CH32-SimpleButton)
 
 
 [回到目录](#目录)

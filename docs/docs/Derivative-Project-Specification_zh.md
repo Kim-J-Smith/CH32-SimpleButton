@@ -33,13 +33,41 @@
 
 - 衍生项目建议保留本项目除`examples/`外的全部文件。
 
-- 其中`README.md`与`README_zh.md`建议转移至`docs/`当中，根目录提供您的项目的`README.md`。
+- 其中原本的`docs/`目录嵌套为`docs/docs/`，而原本的`README.md`与`README_zh.md`建议转移至`docs/`当中，根目录提供您的项目的`README.md`。
 
 - `LICENSE`文件名建议修改为`LICENSE-original`，并在根目录添加您的`LICENSE`。
 
 - 对于`Simple_Button/`目录中的文件，建议您只修改`simple_button_config.h`。如果有别的拓展，可以在该目录下新建文件。
 
 - 修改`simple_button_config.h`时，您可以加入您的项目版本管理号宏，宏命名建议以`SIMPLEBUTTON_`开头，以`VERSION`结尾。
+
+- 在`Simple_Button/`目录中您新增加的文件建议用`sBtn_`开头，使用`SIMPLEBUTTON_XXX_H__`管理您的头文件。
+
+- 最终，衍生项目的目录结构如下：
+
+```
+.
+|
++-- docs/  # 文档资料
+|       |
++       +-- docs/  # 原本的README，LICENSE放入其中
+|       |
++       +-- ...  # 您的其他文档
+|
++-- examples/  # 示例代码
+|
++-- Simple_Button/  # 项目主要代码
+|       |
++       +- sBtn_xxx  # 您新建的文件
+|       |
++       +- Simple_Button.c / Simple_Button.h / simple_button_config.h
+|
++-- .gitattributes  # 辅助显示文件
+|
++-- LICENSE  # 您的开源协议
+|
++-- README.md/README_zh.md  # 您的新的中英文项目说明
+```
 
 ## 函数命名规范
 

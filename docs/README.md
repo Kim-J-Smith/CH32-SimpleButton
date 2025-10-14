@@ -864,7 +864,7 @@ int main(void) {
 
 ### CH32
 
-- [StandardLib-Kim-J-Smith/CH32-SimpleButton]()(coming soon)
+- [StandardLib-Kim-J-Smith/CH32-SimpleButton](https://github.com/Kim-J-Smith/CH32-SimpleButton)
 
 
 [Back to Contents](#contents)
