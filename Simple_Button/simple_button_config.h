@@ -5,19 +5,21 @@
  * 
  * @brief           The configuration file of the Simple_Button file.
  * 
- * @version         0.7.3 ( SIMPLEBUTTON_CONFIG_H__ == 0014L )
+ * @version         0.8.x
  * 
  * @date            2025-10-03
  * 
  * @attention       Copyright (c) 2025 Kim-J-Smith.
  *                  All rights reserved.
  * 
- * @copyright       This project complies with the MIT License.
+ * @copyright       SPDX-License-Identifier: MIT
  *                  Refer to the LICENCE file in root for more details.
+ * 
  *                  <https://github.com/Kim-J-Smith/Simple-Button>
+ *                  <https://github.com/Kim-J-Smith/CH32-SimpleButton>
  */
 #ifndef     SIMPLEBUTTON_CONFIG_H__
-#define     SIMPLEBUTTON_CONFIG_H__     0014L
+#define     SIMPLEBUTTON_CONFIG_H__     1019L
 #include <stdint.h>
 
 /** @p ================================================================ **/
@@ -29,7 +31,7 @@
  * 
  * 1. @e Head-File (Your head file depending on your chip)
  * 
- * 2. @e Simple-Button-Type (The Type of Simple-Button)
+ * 2. @e Simple-Button-Type (The Types used by Simple-Button)
  * 
  * 3. @e Other-Functions (Functions for read-pin, debug, low-power, ...)
  * 
@@ -73,7 +75,10 @@ typedef EXTITrigger_TypeDef simpleButton_Type_EXTITrigger_t;
     GPIO_ReadInputDataBit((GPIO_TypeDef*)GPIOX_Base, Pin)
 
 #define SIMPLEBTN_FUNC_GET_TICK() \
-    HAL_GetTick()
+    HAL_GetTick() // or xTaskGetTickCount() if you use FreeRTOS
+
+#define SIMPLEBTN_FUNC_GET_TICK_FromISR() \
+    HAL_GetTick() // or xTaskGetTickCountFromISR() if you use FreeRTOS
 
 #define SIMPLEBTN_FUNC_PANIC(Cause, ErrorNum, etc) \
     do { simpleButton_debug_panic(Cause); } while(0) /* only used in DEBUG mode */
@@ -168,15 +173,21 @@ typedef EXTITrigger_TypeDef simpleButton_Type_EXTITrigger_t;
 
 /* ================ OTHER LOCAL-PLATFORM CUSTOMIZATION ================= */
 
+static inline void simpleButton_debug_panic(const char* cause)
+{
+    /* deal with the error in debug mode */
+    (void)cause;
+    while(1);
+}
+
+// Init the EXTI
 SIMPLEBTN_FORCE_INLINE
 void simpleButton_Private_InitEXTI(
     simpleButton_Type_GPIOBase_t    GPIOX_Base,
     simpleButton_Type_GPIOPin_t     GPIO_Pin_X,
     simpleButton_Type_EXTITrigger_t EXTI_Trigger_X
 ) {
-    /* Init the time base */
-    HAL_InitTick();
-    
+
     /* Initialize the GPIOx Clock */
     GPIO_InitTypeDef gpio_config;
     EXTI_InitTypeDef exti_config;    
@@ -189,75 +200,85 @@ void simpleButton_Private_InitEXTI(
     /* static constexpr assign values to variables */
     switch(GPIOX_Base)
     {
+#if defined(GPIOA_BASE) && defined(RCC_APB2Periph_GPIOA)
     case GPIOA_BASE:
         PortSource = GPIO_PortSourceGPIOA;
         RCC_GPIOX = RCC_APB2Periph_GPIOA;
         break;
+#endif /* defined(GPIOA) */
+#if defined(GPIOB_BASE) && defined(RCC_APB2Periph_GPIOB)
     case GPIOB_BASE:
         PortSource = GPIO_PortSourceGPIOB;
         RCC_GPIOX = RCC_APB2Periph_GPIOB;
         break;
+#endif /* defined(GPIOB) */
+#if defined(GPIOC_BASE) && defined(RCC_APB2Periph_GPIOC)
     case GPIOC_BASE:
         PortSource = GPIO_PortSourceGPIOC;
         RCC_GPIOX = RCC_APB2Periph_GPIOC;
         break;
+#endif /* defined(GPIOC) */
+#if defined(GPIOD_BASE) && defined(RCC_APB2Periph_GPIOD)
     case GPIOD_BASE:
         PortSource = GPIO_PortSourceGPIOD;
         RCC_GPIOX = RCC_APB2Periph_GPIOD;
         break;
+#endif /* defined(GPIOD) */
+#if defined(GPIOE_BASE) && defined(RCC_APB2Periph_GPIOE)
     case GPIOE_BASE:
         PortSource = GPIO_PortSourceGPIOE;
         RCC_GPIOX = RCC_APB2Periph_GPIOE;
         break;
-#if defined(GPIOF_BASE)
+#endif /* defined(GPIOE) */
+#if defined(GPIOF_BASE) && defined(RCC_APB2Periph_GPIOF)
     case GPIOF_BASE:
         PortSource = GPIO_PortSourceGPIOF;
         RCC_GPIOX = RCC_APB2Periph_GPIOF;
         break;
 #endif /* defined(GPIOF_BASE) */
-#if defined(GPIOG_BASE)
+#if defined(GPIOG_BASE) && defined(RCC_APB2Periph_GPIOG)
     case GPIOG_BASE:
         PortSource = GPIO_PortSourceGPIOG;
         RCC_GPIOX = RCC_APB2Periph_GPIOG;
         break;
 #endif /* defined(GPIOG_BASE) */
-#if defined(GPIOH_BASE)
+#if defined(GPIOH_BASE) && defined(RCC_APB2Periph_GPIOH)
     case GPIOH_BASE:
         PortSource = GPIO_PortSourceGPIOH;
         RCC_GPIOX = RCC_APB2Periph_GPIOH;
         break;
 #endif /* defined(GPIOH_BASE) */
-#if defined(GPIOI_BASE)
+#if defined(GPIOI_BASE) && defined(RCC_APB2Periph_GPIOI)
     case GPIOI_BASE:
         PortSource = GPIO_PortSourceGPIOI;
         RCC_GPIOX = RCC_APB2Periph_GPIOI;
         break;
 #endif /* defined(GPIOI_BASE) */
-#if defined(GPIOJ_BASE)
+#if defined(GPIOJ_BASE) && defined(RCC_APB2Periph_GPIOJ)
     case GPIOJ_BASE:
         PortSource = GPIO_PortSourceGPIOJ;
         RCC_GPIOX = RCC_APB2Periph_GPIOJ;
         break;
 #endif /* defined(GPIOJ_BASE) */
-#if defined(GPIOK_BASE)
+#if defined(GPIOK_BASE) && defined(RCC_APB2Periph_GPIOK)
     case GPIOK_BASE:
         PortSource = GPIO_PortSourceGPIOK;
         RCC_GPIOX = RCC_APB2Periph_GPIOK;
         break;
 #endif /* defined(GPIOK_BASE) */
-#if defined(GPIOL_BASE)
+#if defined(GPIOL_BASE) && defined(RCC_APB2Periph_GPIOL)
     case GPIOL_BASE:
         PortSource = GPIO_PortSourceGPIOL;
         RCC_GPIOX = RCC_APB2Periph_GPIOL;
         break;
 #endif /* defined(GPIOL_BASE) */
-#if defined(GPIOM_BASE)
+#if defined(GPIOM_BASE) && defined(RCC_APB2Periph_GPIOM)
     case GPIOM_BASE:
         PortSource = GPIO_PortSourceGPIOM;
         RCC_GPIOX = RCC_APB2Periph_GPIOM;
         break;
 #endif /* defined(GPIOM_BASE) */
-#if defined(GPION_BASE)
+#if defined(GPION_BASE) && defined(RCC_APB2Periph_GPION)
     case GPION_BASE:
         PortSource = GPIO_PortSourceGPION;
         RCC_GPIOX = RCC_APB2Periph_GPION;
@@ -269,91 +290,136 @@ void simpleButton_Private_InitEXTI(
     }
 
     switch(GPIO_Pin_X)
-    {         
+    {
+
+#if defined(__CH32V00x_H) // CH32V003
     case GPIO_Pin_0:            
         PinSource = GPIO_PinSource0; 
         EXTI_Line = EXTI_Line0; 
-        nvic_config.NVIC_IRQChannel = EXTI0_IRQn;                                                   \
+        nvic_config.NVIC_IRQChannel = EXTI7_0_IRQn;
         break;
     case GPIO_Pin_1:            
         PinSource = GPIO_PinSource1; 
         EXTI_Line = EXTI_Line1; 
-        nvic_config.NVIC_IRQChannel = EXTI1_IRQn;                                                   \
+        nvic_config.NVIC_IRQChannel = EXTI7_0_IRQn;
         break;
     case GPIO_Pin_2:            
         PinSource = GPIO_PinSource2; 
         EXTI_Line = EXTI_Line2; 
-        nvic_config.NVIC_IRQChannel = EXTI2_IRQn;                                                   \
+        nvic_config.NVIC_IRQChannel = EXTI7_0_IRQn;
         break;
     case GPIO_Pin_3:            
         PinSource = GPIO_PinSource3; 
         EXTI_Line = EXTI_Line3; 
-        nvic_config.NVIC_IRQChannel = EXTI3_IRQn;                                                   \
+        nvic_config.NVIC_IRQChannel = EXTI7_0_IRQn;
         break;
     case GPIO_Pin_4:            
         PinSource = GPIO_PinSource4; 
         EXTI_Line = EXTI_Line4; 
-        nvic_config.NVIC_IRQChannel = EXTI4_IRQn;                                                   \
+        nvic_config.NVIC_IRQChannel = EXTI7_0_IRQn;
         break;
     case GPIO_Pin_5:            
         PinSource = GPIO_PinSource5; 
         EXTI_Line = EXTI_Line5; 
-        nvic_config.NVIC_IRQChannel = EXTI9_5_IRQn;                                                 \
+        nvic_config.NVIC_IRQChannel = EXTI7_0_IRQn;
         break;
     case GPIO_Pin_6:            
         PinSource = GPIO_PinSource6; 
         EXTI_Line = EXTI_Line6; 
-        nvic_config.NVIC_IRQChannel = EXTI9_5_IRQn;                                                 \
+        nvic_config.NVIC_IRQChannel = EXTI7_0_IRQn;
         break;
     case GPIO_Pin_7:            
         PinSource = GPIO_PinSource7; 
         EXTI_Line = EXTI_Line7; 
-        nvic_config.NVIC_IRQChannel = EXTI9_5_IRQn;                                                 \
+        nvic_config.NVIC_IRQChannel = EXTI7_0_IRQn;
+        break;
+#else
+    case GPIO_Pin_0:            
+        PinSource = GPIO_PinSource0; 
+        EXTI_Line = EXTI_Line0; 
+        nvic_config.NVIC_IRQChannel = EXTI0_IRQn;
+        break;
+    case GPIO_Pin_1:            
+        PinSource = GPIO_PinSource1; 
+        EXTI_Line = EXTI_Line1; 
+        nvic_config.NVIC_IRQChannel = EXTI1_IRQn;
+        break;
+    case GPIO_Pin_2:            
+        PinSource = GPIO_PinSource2; 
+        EXTI_Line = EXTI_Line2; 
+        nvic_config.NVIC_IRQChannel = EXTI2_IRQn;
+        break;
+    case GPIO_Pin_3:            
+        PinSource = GPIO_PinSource3; 
+        EXTI_Line = EXTI_Line3; 
+        nvic_config.NVIC_IRQChannel = EXTI3_IRQn;
+        break;
+    case GPIO_Pin_4:            
+        PinSource = GPIO_PinSource4; 
+        EXTI_Line = EXTI_Line4; 
+        nvic_config.NVIC_IRQChannel = EXTI4_IRQn;
+        break;
+    case GPIO_Pin_5:            
+        PinSource = GPIO_PinSource5; 
+        EXTI_Line = EXTI_Line5; 
+        nvic_config.NVIC_IRQChannel = EXTI9_5_IRQn;
+        break;
+    case GPIO_Pin_6:            
+        PinSource = GPIO_PinSource6; 
+        EXTI_Line = EXTI_Line6; 
+        nvic_config.NVIC_IRQChannel = EXTI9_5_IRQn;
+        break;
+    case GPIO_Pin_7:            
+        PinSource = GPIO_PinSource7; 
+        EXTI_Line = EXTI_Line7; 
+        nvic_config.NVIC_IRQChannel = EXTI9_5_IRQn;
         break;
     case GPIO_Pin_8:            
         PinSource = GPIO_PinSource8; 
         EXTI_Line = EXTI_Line8; 
-        nvic_config.NVIC_IRQChannel = EXTI9_5_IRQn;                                                 \
+        nvic_config.NVIC_IRQChannel = EXTI9_5_IRQn;
         break;
     case GPIO_Pin_9:            
         PinSource = GPIO_PinSource9; 
         EXTI_Line = EXTI_Line9; 
-        nvic_config.NVIC_IRQChannel = EXTI9_5_IRQn;                                                 \
+        nvic_config.NVIC_IRQChannel = EXTI9_5_IRQn;
         break;
     case GPIO_Pin_10:           
         PinSource = GPIO_PinSource10;
         EXTI_Line = EXTI_Line10;
-        nvic_config.NVIC_IRQChannel = EXTI15_10_IRQn;                                               \
+        nvic_config.NVIC_IRQChannel = EXTI15_10_IRQn;
         break;
     case GPIO_Pin_11:           
         PinSource = GPIO_PinSource11;
         EXTI_Line = EXTI_Line11;
-        nvic_config.NVIC_IRQChannel = EXTI15_10_IRQn;                                               \
+        nvic_config.NVIC_IRQChannel = EXTI15_10_IRQn;
         break;
     case GPIO_Pin_12:           
         PinSource = GPIO_PinSource12;
         EXTI_Line = EXTI_Line12;
-        nvic_config.NVIC_IRQChannel = EXTI15_10_IRQn;                                               \
+        nvic_config.NVIC_IRQChannel = EXTI15_10_IRQn;
         break;
     case GPIO_Pin_13:           
         PinSource = GPIO_PinSource13;
         EXTI_Line = EXTI_Line13;
-        nvic_config.NVIC_IRQChannel = EXTI15_10_IRQn;                                               \
+        nvic_config.NVIC_IRQChannel = EXTI15_10_IRQn;
         break;
     case GPIO_Pin_14:           
         PinSource = GPIO_PinSource14;
         EXTI_Line = EXTI_Line14;
-        nvic_config.NVIC_IRQChannel = EXTI15_10_IRQn;                                               \
+        nvic_config.NVIC_IRQChannel = EXTI15_10_IRQn;
         break;
     case GPIO_Pin_15:           
         PinSource = GPIO_PinSource15;
         EXTI_Line = EXTI_Line15;
-        nvic_config.NVIC_IRQChannel = EXTI15_10_IRQn;                                               \
+        nvic_config.NVIC_IRQChannel = EXTI15_10_IRQn;
         break;
+#endif
+
     default:  
         SIMPLEBTN_FUNC_PANIC("unexpected GPIO pin", , );
         break;
-    }
+    } // end switch
 
     /* GPIO & AFIO Init */
     RCC_APB2PeriphClockCmd(RCC_GPIOX, ENABLE);
@@ -380,12 +446,7 @@ void simpleButton_Private_InitEXTI(
     NVIC_Init(&nvic_config);
 }
 
-static inline void simpleButton_debug_panic(const char* cause)
-{
-    (void)cause;
-    while(1);
-}
-
+// Start the low-power mode. (SLEEP)
 SIMPLEBTN_FORCE_INLINE void simpleButton_start_low_power(void)
 {
     /* We will disable gloabal irq before go into low power mode.
@@ -395,6 +456,11 @@ SIMPLEBTN_FORCE_INLINE void simpleButton_start_low_power(void)
     NVIC->SCTLR |= Mask_IRQ_CanWake_WithoutGlobalEnable;
 
     __WFE();
+
+    /* Use 'nop' to wait the CPU becoming stable */
+    __NOP();
+    __NOP();
+    __NOP();
 }
 
 /* ================================ END ================================ */

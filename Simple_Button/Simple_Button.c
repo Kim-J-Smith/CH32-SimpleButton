@@ -3,24 +3,123 @@
  * 
  * @author          Kim-J-Smith
  * 
- * @brief           State Machine and dynamic-button functions
+ * @brief           Source file of Simple-Button. This file contains 
+ *                  functions for button-init, interrupt-handler, and
+ *                  the State-Machine. The dynamic button functions 
+ *                  are also here.
  * 
- * @version         0.7.3 ( 0014L )
+ * @version         0.8.x
  * 
  * @date            2025-10-03
  * 
  * @attention       Copyright (c) 2025 Kim-J-Smith.
  *                  All rights reserved.
  * 
- * @copyright       This project complies with the MIT License.
+ * @copyright       SPDX-License-Identifier: MIT
  *                  Refer to the LICENCE file in root for more details.
  *                  <https://github.com/Kim-J-Smith/Simple-Button>
  */
 #include    "Simple_Button.h"
-#if SIMPLEBUTTON_H__ != 0014L
+#if ( SIMPLEBUTTON_H__ != 1019L )
  #warning [Simple-Button]: There may be something wrong with the version.
 #endif /* SIMPLEBTN_C_API */
 
+
+/* HOT : Trigger hotspot optimization */
+#if defined(__GNUC__) || defined(__clang__)
+ #define HOT_ __attribute__((hot))
+#elif defined(_MSC_VER) && ( _MSC_VER >= 1900 )
+ #define HOT_ __declspec(hot)
+#else
+ #define HOT_ 
+#endif /* HOT */
+
+SIMPLEBTN_C_API void simpleButton_Private_InitStructPublic(
+    simpleButton_Type_PublicBtnStatus_t* self_public
+) {
+
+#if SIMPLEBTN_MODE_ENABLE_ADJUSTABLE_TIME != 0
+
+    self_public->coolDownTime = SIMPLEBTN_TIME_COOL_DOWN;
+    self_public->longPushMinTime = SIMPLEBTN_TIME_LONG_PUSH_MIN;
+    self_public->repeatWindowTime = SIMPLEBTN_TIME_REPEAT_WINDOW;
+ #if SIMPLEBTN_MODE_ENABLE_LONGPUSH_HOLD != 0
+    self_public->holdPushMinTime = SIMPLEBTN_TIME_HOLD_PUSH_MIN;
+ #endif /* SIMPLEBTN_MODE_ENABLE_LONGPUSH_HOLD != 0 */
+ 
+#endif /* SIMPLEBTN_MODE_ENABLE_ADJUSTABLE_TIME != 0 */
+
+#if SIMPLEBTN_MODE_ENABLE_COMBINATION != 0
+    self_public->combinationConfig.previousButton = 0;
+    self_public->combinationConfig.callBack = 0;
+#endif /* SIMPLEBTN_MODE_ENABLE_COMBINATION != 0 */
+
+}
+
+SIMPLEBTN_C_API void simpleButton_Private_InitStructPrivate(
+    simpleButton_Type_PrivateBtnStatus_t* self_private
+) {
+    /* Initialize the member variables and method */
+    self_private->push_time = 0;
+    self_private->state = simpleButton_State_Wait_For_Interrupt;
+    self_private->timeStamp_interrupt = 0;
+    self_private->timeStamp_loop = 0;
+}
+
+SIMPLEBTN_C_API void simpleButton_Private_InitStructMethods(
+    simpleButton_Type_ButtonMethod_t* self_methods,
+    simpleButton_Type_AsynchronousHandler_t asynchronousHandler,
+    simpleButton_Type_InterruptHandler_t interruptHandler
+) {
+    self_methods->asynchronousHandler = asynchronousHandler;
+    self_methods->interruptHandler = interruptHandler;
+}
+
+/**
+ * @brief           Initialize the status and config of button object.
+ * 
+ * @param[inout]    self - Pointer to the button object.
+ * @param[in]       GPIOX_BASE - The base address of the GPIO port 
+ *                  connected to the button.
+ * @param[in]       asynchronousHandler - Function pointer of asynchronous handler.
+ * @param[in]       interruptHandler - Function pointer of interrupt handler.
+ * 
+ * @return          None
+ */
+SIMPLEBTN_C_API void simpleButton_Private_InitStruct(
+    simpleButton_Type_Button_t* self,
+    simpleButton_Type_AsynchronousHandler_t asynchronousHandler,
+    simpleButton_Type_InterruptHandler_t interruptHandler
+) {
+    SIMPLEBTN_FUNC_CRITICAL_SECTION_BEGIN();
+
+    /* Initialize the member variables and method */
+    simpleButton_Private_InitStructPrivate(&(self->Private));
+
+    simpleButton_Private_InitStructMethods(&(self->Methods), asynchronousHandler, interruptHandler);
+
+    simpleButton_Private_InitStructPublic(&(self->Public));
+
+    SIMPLEBTN_FUNC_CRITICAL_SECTION_END();
+}
+
+/**
+ * @brief           Change the status of each button when during the EXTI interrupt
+ *                  service routine.
+ * 
+ * @return          None
+ */
+SIMPLEBTN_C_API void simpleButton_Private_InterruptHandler(
+    simpleButton_Type_PrivateBtnStatus_t* self_private
+) {
+    if (
+        (simpleButton_Type_ButtonState_t)(self_private->state) == simpleButton_State_Wait_For_Interrupt
+        || (simpleButton_Type_ButtonState_t)(self_private->state) == simpleButton_State_Wait_For_Repeat
+    ) {
+        self_private->timeStamp_interrupt = SIMPLEBTN_FUNC_GET_TICK_FromISR();
+        self_private->state = simpleButton_State_Push_Delay;
+    }
+}
 
 SIMPLEBTN_FORCE_INLINE void
 simpleButton_Private_StateWaitForInterrupt_Handler(void) {
@@ -109,13 +208,13 @@ simpleButton_Private_StateWaitForRepeat_Handler(
         }
 #endif /* SIMPLEBTN_MODE_ENABLE_COUNTER_REPEAT_PUSH == 0 */
 
-    } // end if
+    } /* end if */
 
     SIMPLEBTN_FUNC_CRITICAL_SECTION_END(); /* end always critical section */
     SIMPLEBTN_FUNC_CRITICAL_SECTION_BEGIN_M(); /* begin multi-thread critical section */
 }
 
-// a helper function
+/* a helper function */
 SIMPLEBTN_FORCE_INLINE void
 simpleButton_Private_Do_LongPush(
     simpleButton_Type_PrivateBtnStatus_t* const self_private,
@@ -123,7 +222,7 @@ simpleButton_Private_Do_LongPush(
 ) {
 
 #if SIMPLEBTN_MODE_ENABLE_TIMER_LONG_PUSH == 0
-    (void)self;
+    (void)self_private;
     SIMPLEBTN_FUNC_CRITICAL_SECTION_END_M(); /* end multi-thread critical section */
     if (longPushCallBack != 0) {
         longPushCallBack();
@@ -190,7 +289,7 @@ simpleButton_Private_StateRepeatPush_Handler(
         repeatPushCallBack(self_private->push_time);
 #endif /* SIMPLEBTN_MODE_ENABLE_COUNTER_REPEAT_PUSH == 0 */
 
-    } // end if
+    } /* end if */
 
     SIMPLEBTN_FUNC_CRITICAL_SECTION_BEGIN_M(); /* begin multi-thread critical section */
     self_private->push_time = 0;
@@ -198,7 +297,7 @@ simpleButton_Private_StateRepeatPush_Handler(
     self_private->state = simpleButton_State_Cool_Down;
 }
 
-// a helper function
+/* a helper function */
 SIMPLEBTN_FORCE_INLINE void
 simpleButton_Private_CmbBtnAfterReleaseOK(
     simpleButton_Type_PrivateBtnStatus_t* const self_private,
@@ -211,11 +310,11 @@ simpleButton_Private_CmbBtnAfterReleaseOK(
     }
 
     /* prev-button should be [Combination]_WaitForEnd. */
-    if (self_public->combinationConfig.previousButton->Private.state != simpleButton_State_Combination_WaitForEnd) {
-        if (self_public->combinationConfig.previousButton->Private.state != simpleButton_State_Wait_For_End) {
+    if (self_public->combinationConfig.previousButton->state != simpleButton_State_Combination_WaitForEnd) {
+        if (self_public->combinationConfig.previousButton->state != simpleButton_State_Wait_For_End) {
             return; /* prev-button isn't [Combination]_WaitForEnd. */
         } else {
-            self_public->combinationConfig.previousButton->Private.state = simpleButton_State_Combination_WaitForEnd;
+            self_public->combinationConfig.previousButton->state = simpleButton_State_Combination_WaitForEnd;
         }
     }
 
@@ -224,7 +323,7 @@ simpleButton_Private_CmbBtnAfterReleaseOK(
 #endif /* SIMPLEBTN_MODE_ENABLE_COMBINATION != 0 */
 }
 
-// a helper function
+/* a helper function */
 SIMPLEBTN_FORCE_INLINE void
 simpleButton_Private_ReleaseOK(
     simpleButton_Type_PrivateBtnStatus_t* const self_private,
@@ -407,7 +506,8 @@ simpleButton_Private_StateDefault_Handler(
 
 /**
  * @brief           Asynchronously call the callback function in while loop.
- * @param[inout]    self - pointer to self struct.
+ * @param[inout]    self_private - pointer to self.Private struct.
+ * @param[inout]    self_public - pointer to self.Public struct.
  * @param[in]       gpiox_base - Address of GPIO port connected to the button.
  * @param[in]       gpio_pin_x - GPIO pin number connected to the button.
  * @param[in]       normal_pin_val - Normal(didn't push) pin value of button pin. (can be 1 or 0)
@@ -416,7 +516,7 @@ simpleButton_Private_StateDefault_Handler(
  * @param[in]       repeatPushCB - callback function for repeat push.
  * @return          None
  */
-SIMPLEBTN_C_API void
+SIMPLEBTN_C_API HOT_ void
 simpleButton_Private_AsynchronousHandler(
     simpleButton_Type_PrivateBtnStatus_t* const self_private,
     simpleButton_Type_PublicBtnStatus_t* const self_public,
@@ -508,7 +608,7 @@ simpleButton_Private_AsynchronousHandler(
         break;
     }
 
-    } // end switch
+    } /* end switch */
 
     SIMPLEBTN_FUNC_CRITICAL_SECTION_END_M(); /* end multi-thread critical section */
 }
@@ -520,7 +620,7 @@ simpleButton_Private_AsynchronousHandler(
  * @param[in]       GPIO_Base - The base address of the GPIO port 
  *                  connected to the button.
  * @param[in]       GPIO_Pin - The GPIO Pin number connected to the button.
- * @param[in]       normalPinVal - Normal(didn't push) pin value of button pin. (can be 1 or 0)
+ * @param[in]       inactiveLevel - GPIO Pin level that didn't be pressed. (can be 1 or 0)
  * 
  * @return          None
  */
@@ -529,13 +629,13 @@ SimpleButton_DynamicButton_Init(
     SimpleButton_Type_DynamicBtn_t* const self,
     simpleButton_Type_GPIOBase_t    GPIO_Base,
     simpleButton_Type_GPIOPin_t     GPIO_Pin,
-    simpleButton_Type_GPIOPinVal_t  normalPinVal
+    simpleButton_Type_GPIOPinVal_t  inactiveLevel
 ) {
     SIMPLEBTN_FUNC_CRITICAL_SECTION_BEGIN(); /* critical section begin */
 
     self->GPIO_Base = GPIO_Base;
     self->GPIO_Pin = GPIO_Pin;
-    self->normalPinVal = normalPinVal;
+    self->normalPinVal = inactiveLevel;
 
     simpleButton_Private_InitStructPrivate(&(self->Private));
 
@@ -577,7 +677,7 @@ simpleButton_Private_DynamicBtn_CheckState(
  * 
  * @return          None
  */
-SIMPLEBTN_C_API void
+SIMPLEBTN_C_API HOT_ void
 SimpleButton_DynamicButton_Handler(
     SimpleButton_Type_DynamicBtn_t* const self,
     simpleButton_Type_ShortPushCallBack_t shortPushCallBack,

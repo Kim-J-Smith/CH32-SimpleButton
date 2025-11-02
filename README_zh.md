@@ -7,7 +7,7 @@
 
 ## 简介
 
-- 本项目是基于[Simple-Button](https://github.com/Kim-J-Smith/Simple-Button)的衍生项目，旨在为CH32系列单片机（南京沁恒）的开放提供一个开源的C语言按键框架。
+- 本项目是基于[Simple-Button](https://github.com/Kim-J-Smith/Simple-Button)的衍生项目，旨在为CH32系列单片机（南京沁恒）的开发提供一个开源的C语言按键框架。
 
 - 项目基于EXTI中断触发按键，提供**短按、长按、计时长按、双击、计数多击、组合键、长按保持**等功能，并良好适配**低功耗**。
 

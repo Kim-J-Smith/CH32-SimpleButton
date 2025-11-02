@@ -22,6 +22,8 @@
 |
 +-- examples/  # 示例代码
 |
++-- platform/  # 典型芯片平台衍生项目的配置文件
+|
 +-- Simple_Button/  # 项目主要代码
 |
 +-- .gitattributes  # 辅助显示文件
@@ -42,6 +44,8 @@
 - 修改`simple_button_config.h`时，您可以加入您的项目版本管理号宏，宏命名建议以`SIMPLEBUTTON_`开头，以`VERSION`结尾。
 
 - 在`Simple_Button/`目录中您新增加的文件建议用`sBtn_`开头，使用`SIMPLEBUTTON_XXX_H__`管理您的头文件。
+
+- `platform/` 文件夹无须保留。
 
 - 最终，衍生项目的目录结构如下：
 

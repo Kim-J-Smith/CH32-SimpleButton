@@ -22,6 +22,8 @@
 |
 +-- examples/ # Example code
 |
++-- platform/  # Configuration files of typical MCU platform derivative projects
+|
 +-- Simple_Button/ # main code of the project
 |
 +--.gitattributes # Help display files
@@ -42,6 +44,8 @@
 - When modifying `simple_button_config.h`, you can add your project version number macro. Macro names are recommended to start with `SIMPLEBUTTON_` and end with `VERSION`.
 
 - In the `Simple_Button/` directory, the files you newly added are recommended to start with `sBtn_`. Use `SIMPLEBUTTON_XXX_H__` to manage your header files. 
+
+- The `platform/` folder does not need to be retained.
 
 - Finally, the directory structure of the derivative projects is as follows: 
 
