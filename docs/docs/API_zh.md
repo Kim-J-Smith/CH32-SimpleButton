@@ -48,6 +48,13 @@
     - **参数**：
         - `__VA_ARGS__`：参数的个数是可变的（1~32），需要传入所有按键对象（不论是静态还是动态按键都需要传入）。
 
+4. `SIMPLEBTN__CMBBTN_SETCALLBACK(preButton, nextButton, callback)`
+    - **功能**：配置组合键的回调函数。
+    - **参数**：
+        - `preButton`：组合键中，先按下的按键。
+        - `nextButton`：组合键中，后按下的按键。
+        - `callback`：依次按下按键后，触发的回调函数。
+
 ## 开放函数使用详解
 
 1. **SimpleButton_DynamicButton_Init**

@@ -4,9 +4,11 @@
 
 ---
 
-## 目录
+## <a id="目录">目录</a>
 
 - [目录](#目录)
+
+- [版本号规则](#版本号规则)
 
 - [简介](#简介)
     - [设计简介](#设计简介)
@@ -37,9 +39,27 @@
 
 ---
 
-## 简介
+## <a id="版本号规则">版本号规则</a>
 
-### 设计简介
+- **[版本号](/VERSION)由`主版本号`.`次版本号`.`修订号`-`稳定性代号`-`绝对编号`组成。**
+
+- *`主版本号`*：当发生重大不兼容更新时，主版本号改变。
+
+- *`次版本号`*：当添加新特性、功能或修复重大bug时，次版本号改变。
+
+- *`修订号`*：当修复bug，添加补丁，修正文档及注释时，修订号改变。
+
+- *`稳定性代号`*：可以是`alpha.x` `beta.x` `stable` 三个情况，从左到右稳定性增加。
+
+- *`绝对编号`*：版本的编号，每个不同的版本都有唯一的编号，新版本编号大于老版本。
+
+[回到目录](#目录)
+
+---
+
+## <a id="简介">简介</a>
+
+### <a id="设计简介">设计简介</a>
 
 - 按键是嵌入式设计当中最简单、最常见也最有效的输入。如今的GitHub上已经有相当多成熟的按键开源项目了，但我仍然发现了许多这些项目没有解决的问题：*有的项目按键不支持长按保持，有的项目不支持多击，有的项目不支持低功耗，有的项目的API过于复杂*。（**其中不支持低功耗这一点，其实是项目使用轮询而非中断的必然结果！**）
 
@@ -56,19 +76,18 @@
 
 - 除了初始化函数需要显式调用以外，其他两个函数的调用方式是类似C++的“方法”的。这是我使用C语言进行面对对象的一次尝试。
 
-### 功能简介
+### <a id="功能简介">功能简介</a>
 
 - **在[设计思想](#设计简介)的指导下，本项目实现了一个基于C99标准（或C++11标准）的纯C语言按键项目。**
+1. ✅ **功能全面**： 本项目目前支持*短按、长按、[计时长按](#计时长按)、双击、[计数多击](#计数多击)、[组合键](#组合键)、[长按保持](#长按保持)*。
 
-1. ✅ **功能全面**： 本项目目前支持*短按、长按、计时长按、双击、计数多击、组合键、长按保持*。
+2. ✅ **状态机**： 本项目使用了状态机进行代码组织，实现软件消抖，且扩展性强。**用户无需了解状态机细节即可轻松使用。**
 
-2. ✅ **状态机**： 本项目使用了状态机进行代码组织，实现软件消抖，且扩展性强。但用户无需了解状态机细节即可轻松使用。
-
-3. ✅ **外部中断**： 本项目使用外部中断触发按键，*天然支持低功耗*，项目也提供一行代码判断并进入低功耗的接口。
+3. ✅ **外部中断**： 本项目使用外部中断触发按键，*天然支持[低功耗](#低功耗)*，项目也提供一行代码判断并进入低功耗的接口。
 
 4. ✅ **异步处理**： 回调函数异步处理，减小中断停留时间。
 
-5. ✅ **二次确认**： 本项目对引脚触发信号进行二次确认，即使在供电环境不稳定的场景下也能保证稳定。
+5. ✅ **二次确认**： 本项目对引脚触发信号进行二次确认，即使在供电环境不稳定的场景下也能保证按键信号可靠。
 
 6. ✅ **自定义按键**： 本项目支持对每个按键单独设置*长按判定最小时间、多击窗口时间、冷却时间*，方便按键自定义。
 
@@ -80,11 +99,11 @@
 
 ---
 
-## 使用方法
+## <a id="使用方法">使用方法</a>
 
-### 概述
+### <a id="概述">概述</a>
 
-- 由于本项目是一个跨平台项目，它的所有接口都是抽象的，或者说：所有接口都需要使用者根据所使用的芯片进行自定义。从这个方面来讲，本项目只是个“半成品”。如果您希望直接“开箱即用”，可以看一看[衍生项目](#衍生项目)您需要的芯片的定制化版本。如果有，您可以直接下载，跳过步骤1，直接进行步骤2。
+- 由于本项目是一个跨平台项目，它的所有接口都是抽象的，或者说：所有接口都需要使用者根据所使用的芯片进行自定义。从这个方面来讲，本项目只是个“半成品”。如果您希望直接“开箱即用”，可以看一看[衍生项目](#衍生项目)您需要的芯片的定制化版本。如果有，您可以直接使用对应的定制好的配置文件，跳过步骤1，直接进行步骤2。
 
 - 步骤1：您需要针对您的芯片进行定制化改造（在`simple_button_config.h`中进行）：
     - 1.1 - 在文件`simple_button_config.h`开头的 **Head-File** 添加芯片头文件。
@@ -99,11 +118,13 @@
     - 2.4   - 在`while`循环内调用按键异步处理函数。
     - 2.5   - 在 EXTI 中断函数中调用按键中断处理函数。
 
-### 详细步骤
+### <a id="详细步骤">详细步骤</a>
 
-#### 步骤1
+#### <a id="步骤1">步骤1</a>
 
 - **衍生项目可以跳过 “步骤1”**
+
+- 更多细节参见[config_guide_zh](./docs/config_guide_zh.md)
 
 1. 在文件`simple_button_config.h`开头的 **Head-File** 添加芯片头文件。添加的头文件取决于具体的芯片。下方以STM32F103C8T6的HAL库举例：
 
@@ -160,7 +181,7 @@ typedef uint32_t            simpleButton_Type_EXTITrigger_t;
     /* for example: __WFI() */
 ```
 
-4. 在文件`simple_button_config.h`开头的 **Initialization-Function** 实现EXTI初始化函数。此处给出STM32 HAL库示例：
+4. 在文件`simple_button_config.h`开头的 **Initialization-Function** 实现EXTI初始化函数。您需要在文件最下方的地方补全`simpleButton_Private_InitEXTI()`函数的内容。应当包括：使能GPIO时钟，配置上拉输入；配置EXTI的通道；配置EXTI对应的中断使能。
 
 ```c
 /** @b ================================================================ **/
@@ -168,127 +189,10 @@ typedef uint32_t            simpleButton_Type_EXTITrigger_t;
 
 /* This macro just forward the parameter to another function */
 #define SIMPLEBTN_FUNC_INIT_EXTI(GPIOX_Base, GPIO_Pin_X, EXTI_Trigger_X) \
-    simpleButton_Private_InitEXTI(GPIOX_Base, GPIO_Pin_X, EXTI_Trigger_X) // It is implemented below
-
-
-#if defined(__GNUC__) || defined(__clang__)
-    static inline __attribute__((always_inline))
-#elif defined(_MSC_VER) || defined(__CC_ARM)
-    static __forceinline
-#else
-    static inline
-#endif /* defined(__GNUC__) || defined(__clang__) */
-void simpleButton_Private_InitEXTI(
-    simpleButton_Type_GPIOBase_t    GPIOX_Base,
-    simpleButton_Type_GPIOPin_t     GPIO_Pin_X,
-    simpleButton_Type_EXTITrigger_t EXTI_Trigger_X
-) {
-    /* Initialize the AFIO Clock(F1xx) or SYSCFG Clock */
-#if defined(__HAL_RCC_AFIO_CLK_ENABLE)
-    __HAL_RCC_AFIO_CLK_ENABLE();
-#elif defined(__HAL_RCC_SYSCFG_CLK_ENABLE)
-    __HAL_RCC_SYSCFG_CLK_ENABLE();
-#else
- #warning Cannot find macro for AFIO or SYSCFG !
-#endif /* AFIO or SYSCFG */
-
-    /* Initialize the GPIOx Clock */
-    switch (GPIOX_Base) {
-    case GPIOA_BASE:
-        __HAL_RCC_GPIOA_CLK_ENABLE();
-        break;
-    case GPIOB_BASE:
-        __HAL_RCC_GPIOB_CLK_ENABLE();
-        break;
-    case GPIOC_BASE:
-        __HAL_RCC_GPIOC_CLK_ENABLE();
-        break;
-    case GPIOD_BASE:
-        __HAL_RCC_GPIOD_CLK_ENABLE();
-        break;
-    case GPIOE_BASE:
-        __HAL_RCC_GPIOE_CLK_ENABLE();
-        break;
-    default:
-        /* ... error handler ... */
-    }
-
-    /* Configure the GPIOx */
-    GPIO_InitTypeDef gpio_config;
-    gpio_config.Mode = (EXTI_Trigger_X == EXTI_TRIGGER_RISING)
-        ? (GPIO_MODE_IT_RISING) : (GPIO_MODE_IT_FALLING);
-    gpio_config.Pin = (uint32_t) GPIO_Pin_X;
-    gpio_config.Pull = (EXTI_Trigger_X == EXTI_TRIGGER_RISING)
-        ? (GPIO_PULLDOWN) : (GPIO_PULLUP);
-    gpio_config.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init((GPIO_TypeDef*)GPIOX_Base, &gpio_config);
-
-    /* Initialize the EXTI */
-    IRQn_Type the_exti_IRQ;
-    switch (GPIO_Pin_X) {
-    case GPIO_PIN_0:
-        the_exti_IRQ = EXTI0_IRQn;
-        break;
-    case GPIO_PIN_1:
-        the_exti_IRQ = EXTI1_IRQn;
-        break;
-    case GPIO_PIN_2:
-        the_exti_IRQ = EXTI2_IRQn;
-        break;
-    case GPIO_PIN_3:
-        the_exti_IRQ = EXTI3_IRQn;
-        break;
-    case GPIO_PIN_4:
-        the_exti_IRQ = EXTI4_IRQn;
-        break;
-    case GPIO_PIN_5:
-        the_exti_IRQ = EXTI9_5_IRQn;
-        break;
-    case GPIO_PIN_6:
-        the_exti_IRQ = EXTI9_5_IRQn;
-        break;
-    case GPIO_PIN_7:
-        the_exti_IRQ = EXTI9_5_IRQn;
-        break;
-    case GPIO_PIN_8:
-        the_exti_IRQ = EXTI9_5_IRQn;
-        break;
-    case GPIO_PIN_9:
-        the_exti_IRQ = EXTI9_5_IRQn;
-        break;
-    case GPIO_PIN_10:
-        the_exti_IRQ = EXTI15_10_IRQn;
-        break;
-    case GPIO_PIN_11:
-        the_exti_IRQ = EXTI15_10_IRQn;
-        break;
-    case GPIO_PIN_12:
-        the_exti_IRQ = EXTI15_10_IRQn;
-        break;
-    case GPIO_PIN_13:
-        the_exti_IRQ = EXTI15_10_IRQn;
-        break;
-    case GPIO_PIN_14:
-        the_exti_IRQ = EXTI15_10_IRQn;
-        break;
-    case GPIO_PIN_15:
-        the_exti_IRQ = EXTI15_10_IRQn;
-        break;
-    default:
-        /* ... error handler ... */
-
-    }
-    HAL_NVIC_SetPriority(
-        the_exti_IRQ, 
-        EXTI_PreemptionPriority, /* your priority */
-        EXTI_SubPriority /* your priority */
-    );
-    HAL_NVIC_EnableIRQ(the_exti_IRQ);
-
-}
+    simpleButton_Private_InitEXTI(GPIOX_Base, GPIO_Pin_X, EXTI_Trigger_X)
 ```
 
-#### 步骤2
+#### <a id="步骤2">步骤2</a>
 
 0. 创建按键只需要一个宏就可以实现。但在实际项目中我们往往希望用一个单独的`.c`文件管理所有需要的按键，并提供一个`.h`文件作为使用的接口。本项目提供的两个接口宏分别可以很好的完成`创建`+`声明`两个工作。一般项目的目录结构如下，**下方步骤2.1~2.5使用的就是这样的目录结构**：
 ```markdown
@@ -472,9 +376,9 @@ int main(void) {
 
 ---
 
-## 进阶功能
+## <a id="进阶功能">进阶功能</a>
 
-### 计时长按
+### <a id="计时长按">计时长按</a>
 - 有的时候，单一的长按不能满足我们的需求，我们希望不同时长的长按能有不同的效果。这个时候就需要使用**计时长按**这个高级功能。
 - 在文件`simple_button_config.h`开头的`CUSTOMIZATION`中找到`Mode-Set`，将`#define SIMPLEBTN_MODE_ENABLE_TIMER_LONG_PUSH           0`改为`#define SIMPLEBTN_MODE_ENABLE_TIMER_LONG_PUSH           1`，即可启用**计时长按**。
 - 启用此功能后，按键的长按回调函数将**不再是无参无返回值类型，变为有`uint32_t`参数而无返回值的类型**，该类型接收的值为长按时间。
@@ -508,7 +412,7 @@ int main(void) {
 
 ```
 
-### 计数多击
+### <a id="计数多击">计数多击</a>
 - 有的时候，简单的双击不能满足我们的需求。我们可能需要3击、4击…… 这时，我们就需要开启**计数多击**这个功能。
 - 在文件`simple_button_config.h`开头的`CUSTOMIZATION`中找到`Mode-Set`，将`#define SIMPLEBTN_MODE_ENABLE_COUNTER_REPEAT_PUSH       0`改为`#define SIMPLEBTN_MODE_ENABLE_COUNTER_REPEAT_PUSH       1`，即可启用**计数多击**。
 - 启用此功能后，按键的**无参无返回值双击回调函数会变为有`uint8_t`参数且无返回值的函数**，此参数接收实际按下的次数。所以原先传入双击回调函数的地方实际上就变成了传入计数多击回调函数。
@@ -553,16 +457,16 @@ int main(void) {
 
 ```
 
-### 长按保持
+### <a id="长按保持">长按保持</a>
 - 有的时候我们希望按键按下后能够间歇性地、持续地触发某个函数。这时就要使用**长按保持**功能。
 - 在文件`simple_button_config.h`开头的`CUSTOMIZATION`中找到`Mode-Set`，将`#define SIMPLEBTN_MODE_ENABLE_LONGPUSH_HOLD             0`改为`#define SIMPLEBTN_MODE_ENABLE_LONGPUSH_HOLD             1`，即可启用**长按保持**。
 - 启用该功能后，传入的长按回调函数依然保持无参无返回值（如果您同时启用了[计时长按](#计时长按)，将会与普通的**计时长按**一样有`uint32_t`的参数），唯一的不同是这个函数会在您持续按压按键期间，周期性地被调用。
 - 由于用户代码没有改变，仅回调时机发生改变，因此示例略。
 
-### 组合键
+### <a id="组合键">组合键</a>
 - 有时候我们希望按键的组合能够有全新的作用。这时就要使用**组合键**功能。
 - 在文件`simple_button_config.h`开头的`CUSTOMIZATION`中找到`Mode-Set`，将`#define SIMPLEBTN_MODE_ENABLE_COMBINATION               0`改为`#define SIMPLEBTN_MODE_ENABLE_COMBINATION               1`，即可启用**组合键**。
-- 本项目实现组合键的方式是 `前驱按键` + `后继按键`。组合键的回调函数绑定在`后继按键`处，同时在`后继按键`处指定它的`前驱按键`。当用户在`前驱按键`按下期间，按下`后继按键`，就会触发绑定在`后继按键`上的组合键回调函数。
+- 本项目实现组合键的方式是 `前驱按键` + `后继按键`。组合键的回调函数绑定在`后继按键`处，同时在`后继按键`处指定它的`前驱按键`。当用户在`前驱按键`按下期间，按下`后继按键`，就会触发绑定在`后继按键`上的组合键回调函数。（使用**SIMPLEBTN__CMBBTN_SETCALLBACK()**宏完成）
 - 组合键是有顺序的。`按键A + 按键B` 与 `按键B + 按键A`是不同的组合键。
 - 在组合键**触发后**，`前驱按键`与`后继按键`都不会触发它们的短按、长按/计时长按/长按保持、双击/计数多击回调函数。（**但在组合键触发前，如果启用了[长按保持](#长按保持)模式并先触发了长按保持回调，组合键将不会生效！！**）
 - 组合键回调函数虽然不会以参数形式传入异步处理函数，但**异步处理函数不能缺失**。
@@ -588,14 +492,14 @@ int main(void) {
     /* 初始化之后配置组合键 */
 
     // SB2的前置按键是SB1，同时配置 SB1 --> SB2 的组合回调
-    SimpleButton_SB2.Public.combinationConfig.previousButton = &SimpleButton_SB1;
-    SimpleButton_SB2.Public.combinationConfig.callBack = Cmb_SB1_then_SB2_CallBack;
+    SIMPLEBTN__CMBBTN_SETCALLBACK(SimpleButton_SB1, SimpleButton_SB2, Cmb_SB1_then_SB2_CallBack);
 
     // SB1的前置按键是SB2，同时配置 SB2 --> SB1 的组合回调
-    SimpleButton_SB1.Public.combinationConfig.previousButton = &SimpleButton_SB2;
-    SimpleButton_SB1.Public.combinationConfig.callBack = Cmb_SB2_then_SB1_CallBack;
+    SIMPLEBTN__CMBBTN_SETCALLBACK(SimpleButton_SB2, SimpleButton_SB1, Cmb_SB2_then_SB1_CallBack);
 
     while (1) {
+
+        // asynchronousHandler 不能省略，即使传入参数都为NULL
         SimpleButton_SB1.Methods.asynchronousHandler(
             NULL,
             NULL,
@@ -611,7 +515,7 @@ int main(void) {
 
 ```
 
-### 低功耗
+### <a id="低功耗">低功耗</a>
 - 当按键不被按下时，CPU空转无意义。此时可以进入低功耗模式。
 - 本项目提供一个判断所有按键都处于空闲状态并进入低功耗模式的宏函数`SIMPLEBTN__START_LOWPOWER`（C99及以上或C++11及以上才提供），**一行代码进入低功耗**。
 - **低功耗支持是本项目的核心设计动机**，这将在[低功耗设计](#低功耗设计)中详细展开。
@@ -634,7 +538,7 @@ int main(void) {
 
 ```
 
-### 可调时间
+### <a id="可调时间">可调时间</a>
 - 本项目有许多重要的“**判定时间**”，例如：最短的长按时间、多击的窗口时间、按键的冷却时间…… 也许您需要为不同的按键配置不同的**判定时间**，这时，你就需要使用**可调时间**功能。
 - 在文件`simple_button_config.h`开头的`CUSTOMIZATION`中找到`Mode-Set`，将`#define SIMPLEBTN_MODE_ENABLE_ADJUSTABLE_TIME         0`改为`#define SIMPLEBTN_MODE_ENABLE_ADJUSTABLE_TIME         1`，即可启用**可调时间**。
 - 示例如下（初始化、异步处理函数、中断处理函数等没有特殊变化，此处省略不演示）：
@@ -662,7 +566,7 @@ int main(void) {
 
 ```
 
-### 名称前缀/命名空间
+### <a id="名称前缀命名空间">名称前缀/命名空间</a>
 - 有的时候我们希望不使用`SimpleButton_`这个前缀，需要自定义前缀。这通过**名称前缀/命名空间**可以很轻松实现。
 - 只需要在文件`simple_button_config.h`开头的`CUSTOMIZATION`中找到`Namespace`，将`#define SIMPLEBTN_NAMESPACE                             SimpleButton_`改为您需要的自定义前缀即可。
 - 此处以`#define SIMPLEBTN_NAMESPACE                             SB_`举例：
@@ -694,7 +598,7 @@ void EXTI0_IRQHandler(void) {
 
 ---
 
-## 状态机图解
+## <a id="状态机图解">状态机图解</a>
 
 ```mermaid
 
@@ -759,7 +663,7 @@ stateDiagram-v2
 
 ---
 
-## 低功耗设计
+## <a id="低功耗设计">低功耗设计</a>
 
 - 低功耗是本项目设计的主要目的：使用外部中断而非轮询带来了天然的中断支持。
 
@@ -768,16 +672,16 @@ stateDiagram-v2
 - 本项目提供了`SIMPLEBTN__START_LOWPOWER(...)`一键进入低功耗接口，使用方法已在[低功耗](#低功耗)给出。
 
 - `__WFI()`固然是最简单的进入低功耗的函数，但这样做可能效果并不能完全达到预期，此处提供一些低功耗建议：
+  
+  1. 在进入低功耗模式前，建议将所有 I/O 配置成为上拉/下拉输入或模拟输入，防止芯片 I/O 浮空产生漏电流。<sup>[1](#ref-low-power-wch_zh)</sup>
+  
+  2. 对于芯片小封装型号，相较最大封装，未封装出的引脚，建议配置为上拉/下拉输入或模拟输入，否则可能影响电流指标。<sup>[1](#ref-low-power-wch_zh)</sup>
+  
+  3. 释放SWD 调试接口作为GPIO功能,并配置为上拉/下拉输入或模拟输入(唤醒后恢复SWD功能)。<sup>[1](#ref-low-power-wch_zh)</sup>
+  
+  4. 建议在进入低功耗模式前，彻底关闭不需要使用的外设。如果条件允许，关闭PLL切换低速时钟以节能。
 
-    1. 在进入低功耗模式前，建议将所有 I/O 配置成为上拉/下拉输入或模拟输入，防止芯片 I/O 浮空产生漏电流。[1]
-
-    2. 对于芯片小封装型号，相较最大封装，未封装出的引脚，建议配置为上拉/下拉输入或模拟输入，否则可能影响电流指标。[1]
-
-    3. 释放SWD 调试接口作为GPIO功能,并配置为上拉/下拉输入或模拟输入(唤醒后恢复SWD功能)。[1]
-
-    4. 建议在进入低功耗模式前，彻底关闭不需要使用的外设。如果条件允许，关闭PLL切换低速时钟以节能。
-
-[1]: 参考 https://github.com/openwch/ch32_application_notes
+<a id="ref-low-power-wch_zh">[1]</a>: 参考 https://github.com/openwch/ch32_application_notes
 
 - 因此，您可能需要定制`SIMPLEBTN_FUNC_START_LOW_POWER()`这个宏接口，它会被`SIMPLEBTN__START_LOWPOWER(...)`调用。伪代码示例如下：
 
@@ -805,7 +709,7 @@ static inline void simpleButton_start_low_power(void) {
 
 ---
 
-## 动态按键
+## <a id="动态按键">动态按键</a>
 
 - 有的时候，我们需要动态地创建按键，又或者我们需要同时使用`PA0`与`PB0`这类相同拥有相同编号的引脚作为按键引脚。本项目主要提供的基于`EXTI`的按键恐怕难以胜任。
 
@@ -856,7 +760,7 @@ int main(void) {
 
 ---
 
-## 衍生项目
+## <a id="衍生项目">衍生项目</a>
 
 - 本项目的衍生项目应当遵循[衍生项目规范](./docs/Derivative-Project-Specification_zh.md)，以下简称**规范**。
 
@@ -864,11 +768,11 @@ int main(void) {
 
 ### STM32
 
-- [HAL库-Kim-J-Smith/STM32-SimpleButton](https://github.com/Kim-J-Smith/STM32-SimpleButton)
+- [HAL库-Kim-J-Smith/STM32-SimpleButton](/platform/stm32-hal/)
 
 ### CH32
 
-- [标准库-Kim-J-Smith/CH32-SimpleButton](https://github.com/Kim-J-Smith/CH32-SimpleButton)
+- [标准库-Kim-J-Smith/CH32-SimpleButton](/platform/ch32v/)
 
 
 [回到目录](#目录)

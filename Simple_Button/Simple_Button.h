@@ -3,40 +3,46 @@
  * 
  * @author          Kim-J-Smith
  * 
- * @brief           A template for the button is provided
+ * @brief           Header file of Simple-Button. This file contains
+ *                  necessary declarations of functions.
  * 
- * @version         0.7.3 ( SIMPLEBUTTON_H__ == 0014L )
+ * @version         0.8.x
  * 
  * @date            2025-10-03
  * 
  * @attention       Copyright (c) 2025 Kim-J-Smith.
  *                  All rights reserved.
  * 
- * @copyright       This project complies with the MIT License.
+ * @copyright       SPDX-License-Identifier: MIT
  *                  Refer to the LICENCE file in root for more details.
  *                  <https://github.com/Kim-J-Smith/Simple-Button>
  */
 #ifndef     SIMPLEBUTTON_H__
-#define     SIMPLEBUTTON_H__    0014L
+#define     SIMPLEBUTTON_H__    1019L
 
 /* Incldue the config file of Simple_Button and check the version */
 #include    "simple_button_config.h"
-#if SIMPLEBUTTON_CONFIG_H__ != SIMPLEBUTTON_H__
+#if ( SIMPLEBUTTON_CONFIG_H__ != SIMPLEBUTTON_H__ )
  #warning [Simple-Button] : the version of "simple_button_config.h"\
  is different from it of "Simple_Button.h".
 #endif /* SIMPLEBUTTON_CONFIG_H__ != SIMPLEBUTTON_H__ */
 
 /* ============== Private-Use Macro / Type / Function ================= */
 
-// Macro for bit-field
+/* Compatible with previous versions */
+#ifndef SIMPLEBTN_FUNC_GET_TICK_FromISR
+ #define SIMPLEBTN_FUNC_GET_TICK_FromISR()  SIMPLEBTN_FUNC_GET_TICK()
+#endif /* SIMPLEBTN_FUNC_GET_TICK_FromISR */
+
+/* Macro for bit-field */
 #define SIMPLEBTN_BITFIELD(type)                        uint32_t
 
-// Macro for debug
+/* Macro for debug */
 #if SIMPLEBTN_MODE_ENABLE_DEBUG == 1
  #define SIMPLEBTN_DEBUG
 #endif /* SIMPLEBTN_MODE_ENABLE_DEBUG == 1 */
 
-// Macro for multi-threads
+/* Macro for multi-threads */
 #if SIMPLEBTN_MODE_ENABLE_MULTI_THREADS == 1
  #define SIMPLEBTN_FUNC_CRITICAL_SECTION_BEGIN_M() SIMPLEBTN_FUNC_CRITICAL_SECTION_BEGIN()
  #define SIMPLEBTN_FUNC_CRITICAL_SECTION_END_M() SIMPLEBTN_FUNC_CRITICAL_SECTION_END()
@@ -45,14 +51,14 @@
  #define SIMPLEBTN_FUNC_CRITICAL_SECTION_END_M()
 #endif /* SIMPLEBTN_MODE_ENABLE_MULTI_THREADS == 1 */
 
-// Macro for C API
+/* Macro for C API */
 #ifdef __cplusplus
  #define SIMPLEBTN_C_API extern "C"
 #else
  #define SIMPLEBTN_C_API
 #endif
 
-// Macro for force-inline
+/* Macro for force-inline */
 #if !defined(SIMPLEBTN_FORCE_INLINE)
  #if defined(__GNUC__) || defined(__clang__)
   #define SIMPLEBTN_FORCE_INLINE static inline __attribute__((always_inline))
@@ -63,14 +69,14 @@
  #endif
 #endif /* !defined(SIMPLEBTN_FORCE_INLINE) */
 
-// Macro to connect 2 macro
+/* Macro to connect 2 macro */
 #define SIMPLEBTN_CONNECT2(a, b) SIMPLEBTN_CONNECT2_1(a, b)
 #define SIMPLEBTN_CONNECT2_1(a, b) SIMPLEBTN_CONNECT2_2(a, b)
 #define SIMPLEBTN_CONNECT2_2(a, b) SIMPLEBTN_CONNECT2_3(a, b)
 #define SIMPLEBTN_CONNECT2_3(a, b) SIMPLEBTN_CONNECT2_4(a, b)
 #define SIMPLEBTN_CONNECT2_4(a, b) SIMPLEBTN_CONNECT2_5(a, b)
 #define SIMPLEBTN_CONNECT2_5(a, b) a ## b
-// Macro to connect 3 macro
+/* Macro to connect 3 macro */
 #define SIMPLEBTN_CONNECT3(a, b, c) SIMPLEBTN_CONNECT3_1(a, b, c)
 #define SIMPLEBTN_CONNECT3_1(a, b, c) SIMPLEBTN_CONNECT3_2(a, b, c)
 #define SIMPLEBTN_CONNECT3_2(a, b, c) SIMPLEBTN_CONNECT3_3(a, b, c)
@@ -81,11 +87,11 @@
 #if (defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)) \
     || (defined(__cplusplus) && __cplusplus >= 201103L)
 
-// Macro to count args - 1
+/* Macro to count args - 1 */
  #define SIMPLEBTN_COUNT_ARGS_IMPL(_1, _2, _3, _4, _5, _6, _7, _8,  \
     _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20,      \
     _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, N, ...) N
-// Macro to count args - 2
+/* Macro to count args - 2 */
  #define SIMPLEBTN_COUNT_ARGS(...)         \
     SIMPLEBTN_COUNT_ARGS_IMPL(__VA_ARGS__, \
         32, 31, 30, 29, 28, 27, 26, 25, \
@@ -95,24 +101,24 @@
 
 #endif /* >= C99 or C++11 */
 
-// Short-Push callback function pointer Type
+/* Short-Push callback function pointer Type */
 typedef void (* simpleButton_Type_ShortPushCallBack_t)(void);
 
-// Long-Push callback function pointer Type
+/* Long-Push callback function pointer Type */
 #if SIMPLEBTN_MODE_ENABLE_TIMER_LONG_PUSH == 0
  typedef void (* simpleButton_Type_LongPushCallBack_t)(void);
 #else
  typedef void (* simpleButton_Type_LongPushCallBack_t)(uint32_t longPushTime);
 #endif /* SIMPLEBTN_MODE_ENABLE_TIMER_LONG_PUSH == 0 */
 
-// Repeat-Push callback function pointer Type
+/* Repeat-Push callback function pointer Type */
 #if SIMPLEBTN_MODE_ENABLE_COUNTER_REPEAT_PUSH == 0
  typedef void (* simpleButton_Type_RepeatPushCallBack_t)(void);
 #else
  typedef void (* simpleButton_Type_RepeatPushCallBack_t)(uint8_t repeatCount);
 #endif /* SIMPLEBTN_MODE_ENABLE_COUNTER_REPEAT_PUSH == 0 */
 
-// Combination-Push callback function pointer Type
+/* Combination-Push callback function pointer Type */
 #if SIMPLEBTN_MODE_ENABLE_COMBINATION != 0
  typedef void (* simpleButton_Type_CombinationPushCallBack_t)(void);
 #endif /* SIMPLEBTN_MODE_ENABLE_COMBINATION != 0 */
@@ -167,7 +173,7 @@ typedef enum simpleButton_Type_ButtonState_t {
 
 } simpleButton_Type_ButtonState_t;
 
-// struct for button private status.
+/* struct for button private status. */
 typedef struct simpleButton_Type_PrivateBtnStatus_t {
 
     uint32_t                        timeStamp_loop; /* used in while loop */
@@ -180,13 +186,13 @@ typedef struct simpleButton_Type_PrivateBtnStatus_t {
 
 } simpleButton_Type_PrivateBtnStatus_t;
 
-// struct for combination status and config.
+/* struct for combination status and config. */
 #if SIMPLEBTN_MODE_ENABLE_COMBINATION != 0
 
- struct simpleButton_Type_Button_t; // declare
+ struct simpleButton_Type_Button_t; /* just declare */
  typedef struct simpleButton_Type_CmbBtnConfig_t {
 
-    volatile struct simpleButton_Type_Button_t* previousButton;
+    volatile struct simpleButton_Type_PrivateBtnStatus_t* previousButton;
 
     volatile simpleButton_Type_CombinationPushCallBack_t callBack;
 
@@ -194,7 +200,7 @@ typedef struct simpleButton_Type_PrivateBtnStatus_t {
 
 #endif /* SIMPLEBTN_MODE_ENABLE_COMBINATION != 0 */
 
-// struct for public status and config.
+/* struct for public status and config. */
 typedef struct simpleButton_Type_PublicBtnStatus_t {
 
 #if SIMPLEBTN_MODE_ENABLE_COMBINATION != 0
@@ -216,7 +222,7 @@ typedef struct simpleButton_Type_PublicBtnStatus_t {
 #endif /* SIMPLEBTN_MODE_ENABLE_ADJUSTABLE_TIME != 0 */
 } simpleButton_Type_PublicBtnStatus_t;
 
-// struct for public method.
+/* struct for public method. */
 typedef struct simpleButton_Type_ButtonMethod_t {
 
     simpleButton_Type_AsynchronousHandler_t asynchronousHandler;
@@ -253,6 +259,7 @@ typedef struct simpleButton_Type_Button_t {
  *              see <../README.md/#dynamic-button> for more details.
  */
 typedef struct SimpleButton_Type_DynamicBtn_t {
+
     simpleButton_Type_GPIOBase_t    GPIO_Base;
 
     simpleButton_Type_GPIOPin_t     GPIO_Pin;
@@ -262,78 +269,32 @@ typedef struct SimpleButton_Type_DynamicBtn_t {
     simpleButton_Type_PrivateBtnStatus_t Private;
 
     simpleButton_Type_PublicBtnStatus_t Public;
+    
 } SimpleButton_Type_DynamicBtn_t;
 
-
-
-SIMPLEBTN_FORCE_INLINE void simpleButton_Private_InitStructPublic(
+/* Init the Button.Public */
+SIMPLEBTN_C_API void simpleButton_Private_InitStructPublic(
     simpleButton_Type_PublicBtnStatus_t* self_public
-) {
+);
 
-#if SIMPLEBTN_MODE_ENABLE_ADJUSTABLE_TIME != 0
-
-    self_public->coolDownTime = SIMPLEBTN_TIME_COOL_DOWN;
-    self_public->longPushMinTime = SIMPLEBTN_TIME_LONG_PUSH_MIN;
-    self_public->repeatWindowTime = SIMPLEBTN_TIME_REPEAT_WINDOW;
- #if SIMPLEBTN_MODE_ENABLE_LONGPUSH_HOLD != 0
-    self_public->holdPushMinTime = SIMPLEBTN_TIME_HOLD_PUSH_MIN;
- #endif /* SIMPLEBTN_MODE_ENABLE_LONGPUSH_HOLD != 0 */
- 
-#endif /* SIMPLEBTN_MODE_ENABLE_ADJUSTABLE_TIME != 0 */
-
-#if SIMPLEBTN_MODE_ENABLE_COMBINATION != 0
-    self_public->combinationConfig.previousButton = 0;
-    self_public->combinationConfig.callBack = 0;
-#endif /* SIMPLEBTN_MODE_ENABLE_COMBINATION != 0 */
-
-}
-
-SIMPLEBTN_FORCE_INLINE void simpleButton_Private_InitStructPrivate(
+/* Init the Button.Private */
+SIMPLEBTN_C_API void simpleButton_Private_InitStructPrivate(
     simpleButton_Type_PrivateBtnStatus_t* self_private
-) {
-    /* Initialize the member variables and method */
-    self_private->push_time = 0;
-    self_private->state = simpleButton_State_Wait_For_Interrupt;
-    self_private->timeStamp_interrupt = 0;
-    self_private->timeStamp_loop = 0;
-}
+);
 
-SIMPLEBTN_FORCE_INLINE void simpleButton_Private_InitStructMethods(
+/* Init the Button.Methods */
+SIMPLEBTN_C_API void simpleButton_Private_InitStructMethods(
     simpleButton_Type_ButtonMethod_t* self_methods,
     simpleButton_Type_AsynchronousHandler_t asynchronousHandler,
     simpleButton_Type_InterruptHandler_t interruptHandler
-) {
-    self_methods->asynchronousHandler = asynchronousHandler;
-    self_methods->interruptHandler = interruptHandler;
-}
+);
 
-/**
- * @brief           Initialize the status and config of button object.
- * 
- * @param[inout]    self - Pointer to the button object.
- * @param[in]       GPIOX_BASE - The base address of the GPIO port 
- *                  connected to the button.
- * @param[in]       asynchronousHandler - Function pointer of asynchronous handler.
- * @param[in]       interruptHandler - Function pointer of interrupt handler.
- * 
- * @return          None
- */
-SIMPLEBTN_FORCE_INLINE void simpleButton_Private_InitStruct(
+
+SIMPLEBTN_C_API void simpleButton_Private_InitStruct(
     simpleButton_Type_Button_t* self,
     simpleButton_Type_AsynchronousHandler_t asynchronousHandler,
     simpleButton_Type_InterruptHandler_t interruptHandler
-) {
-    SIMPLEBTN_FUNC_CRITICAL_SECTION_BEGIN();
-
-    /* Initialize the member variables and method */
-    simpleButton_Private_InitStructPrivate(&(self->Private));
-
-    simpleButton_Private_InitStructMethods(&(self->Methods), asynchronousHandler, interruptHandler);
-
-    simpleButton_Private_InitStructPublic(&(self->Public));
-
-    SIMPLEBTN_FUNC_CRITICAL_SECTION_END();
-}
+);
 
 /**
  * @brief           Initilize the button.
@@ -371,35 +332,12 @@ SIMPLEBTN_FORCE_INLINE void simpleButton_Private_InitButton(
 
 }
 
-/**
- * @brief           Change the status of each button when during the EXTI interrupt
- *                  service routine.
- * 
- * @return          None
- */
-SIMPLEBTN_FORCE_INLINE void simpleButton_Private_InterruptHandler(
-    simpleButton_Type_Button_t* self
-) {
-    if (
-        (simpleButton_Type_ButtonState_t)(self->Private.state) == simpleButton_State_Wait_For_Interrupt
-        || (simpleButton_Type_ButtonState_t)(self->Private.state) == simpleButton_State_Wait_For_Repeat
-    ) {
-        self->Private.timeStamp_interrupt = SIMPLEBTN_FUNC_GET_TICK();
-        self->Private.state = simpleButton_State_Push_Delay;
-    }
-}
 
-/**
- * @brief           Asynchronously call the callback function in while loop.
- * @param[inout]    self - pointer to self struct.
- * @param[in]       gpiox_base - Address of GPIO port connected to the button.
- * @param[in]       gpio_pin_x - GPIO pin number connected to the button.
- * @param[in]       normal_pin_val - Normal(didn't push) pin value of button pin. (can be 1 or 0)
- * @param[in]       shortPushCB - callback function for short push.
- * @param[in]       longPushCB - callback function for long push.
- * @param[in]       repeatPushCB - callback function for repeat push.
- * @return          None
- */
+SIMPLEBTN_C_API void simpleButton_Private_InterruptHandler(
+    simpleButton_Type_PrivateBtnStatus_t* self_private
+);
+
+
 SIMPLEBTN_C_API void
 simpleButton_Private_AsynchronousHandler(
     simpleButton_Type_PrivateBtnStatus_t* const self_private,
@@ -542,7 +480,7 @@ SIMPLEBTN_FORCE_INLINE uint32_t simpleButton_Private_IsIdle(const simpleButton_T
     static void                                                                 \
     SIMPLEBTN_CONNECT2(simpleButton_Private_ITHandler_, __name)(void) {         \
         simpleButton_Private_InterruptHandler(                                  \
-            &(SIMPLEBTN_CONNECT2(SIMPLEBTN_NAMESPACE, __name))                  \
+            &(SIMPLEBTN_CONNECT2(SIMPLEBTN_NAMESPACE, __name).Private)          \
         );                                                                      \
     }                                                                           \
                                                                                 \
@@ -571,12 +509,34 @@ SIMPLEBTN_FORCE_INLINE uint32_t simpleButton_Private_IsIdle(const simpleButton_T
     SIMPLEBTN_CONNECT3(SIMPLEBTN_NAMESPACE, __name, _Init)(void);
 
 
+#if ( SIMPLEBTN_MODE_ENABLE_COMBINATION != 0 )
+
+/**
+ * @def             SIMPLEBTN__CMBBTN_SETCALLBACK
+ * @brief           Set callback function for @b Combination-Button.
+ * 
+ * @param[in]       preButton - The `previous button` of @b Combination-Button.
+ *                  `previous button` is the button that is pressed first.
+ * @param[inout]    nextButton - The `next button` of @b Combination-Button.
+ *                  `previous button` is the button that is pressed second.
+ * @param[in]       callback - The callback function of @b Combination-Button.
+ * 
+ * @attention       Make sure the macro `SIMPLEBTN_MODE_ENABLE_COMBINATION` is defined as 1.
+ */
+ #define SIMPLEBTN__CMBBTN_SETCALLBACK(preButton, nextButton, callback)                  \
+    do {                                                                                \
+        (nextButton).Public.combinationConfig.previousButton = &((preButton).Private);  \
+        (nextButton).Public.combinationConfig.callBack = callback;                      \
+    } while(0)
+
+#endif /* SIMPLEBTN_MODE_ENABLE_COMBINATION != 0 */
+
 SIMPLEBTN_C_API void
 SimpleButton_DynamicButton_Init(
     SimpleButton_Type_DynamicBtn_t* const self,
     simpleButton_Type_GPIOBase_t    GPIO_Base,
     simpleButton_Type_GPIOPin_t     GPIO_Pin,
-    simpleButton_Type_GPIOPinVal_t  normalPinVal
+    simpleButton_Type_GPIOPinVal_t  inactiveLevel
 );
 
 SIMPLEBTN_C_API void

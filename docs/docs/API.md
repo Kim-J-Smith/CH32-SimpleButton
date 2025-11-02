@@ -46,7 +46,14 @@
 3. `SIMPLEBTN__START_LOWPOWER(...) `
     - **Function**: Check whether all buttons are in the idle state (Wait For Interrupt). If so, call `SIMPLEBTN_FUNC_START_LOW_POWER()` to enter the low-power mode. `SIMPLEBTN_FUNC_START_LOW_POWER()` is an interface implemented by the user in `simple_button_config.h`.
     - **Parameters**:
-    - `__VA_ARGS__`: The number of parameters is variable (1 to 32), and all button objects (whether static or dynamic buttons need to be passed in).
+        - `__VA_ARGS__`: The number of parameters is variable (1 to 32), and all button objects (whether static or dynamic buttons need to be passed in).
+
+4. `SIMPLEBTN__CMBBTN_SETCALLBACK(preButton, nextButton, callback)`
+    - **Function**: Configure the callback function for the combination keys.
+    - **Parameters**:
+        - `preButton`: The button that was pressed first in the combination.
+        - `nextButton`: The button that was pressed second in the combination.
+        - `callback`: The callback function that will be triggered after each button is pressed in sequence.
 
 ## Public Functions
 

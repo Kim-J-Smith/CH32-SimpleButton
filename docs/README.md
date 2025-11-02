@@ -8,6 +8,8 @@
 
 - [Contents](#contents)
 
+- [Version number rule](#version-number-rule)
+
 - [Brief Introduction](#brief-introduction)
     - [Brief instruction of design](#brief-instruction-of-design)
     - [Brief introduction of the feature](#brief-introduction-of-the-feature)
@@ -37,6 +39,24 @@
 
 ---
 
+## Version number rule
+
+The [version number](/VERSION) is composed of `major version number`.`minor version number`.`patch number`-`stability code`-`absolute number`. 
+
+- *`major version number`*: Changes when there are major incompatible updates.
+
+- *`minor version number`*: Changes when new features, functions are added or major bugs are fixed.
+
+- *`patch number`*: Changes when bugs are fixed, patches are added, and documentation and comments are corrected.
+
+- *`stability code`*: Can be `alpha.x`, `beta.x`, or `stable`, with stability increasing from left to right.
+
+- *`absolute number`*: The version number, each different version has a unique number, and the new version number is greater than the old one.
+
+[Back to Contents](#contents)
+
+---
+
 ## Brief Introduction
 
 ### Brief instruction of design
@@ -60,11 +80,11 @@
 
 - **Under the guidance of the [Design Concept](#brief-instruction-of-design), this project has implemented a pure C language button project based on the C99 standard (or C++11 standard).**
 
-1. ✅ **Comprehensive Features** : This project currently supports *short press, long press, timer long press, double push, counter multiple push, combination buttons, and long press hold*.
+1. ✅ **Comprehensive Features** : This project currently supports *short press, long press, [timer long press](#timer-long-push), double push, [counter multiple push](#counter-repeat-push), [combination buttons](#button-combinations), and [long press hold](#long-push-hold)*.
 
-2. ✅ **State Machine** : This project employs a state machine for code organization to achieve software debouncing and has strong scalability. However, users can use it easily without having to understand the details of the state machine.
+2. ✅ **State Machine** : This project employs a state machine for code organization to achieve software debouncing and has strong scalability. However, **users can use it easily without having to understand the details of the state machine.**
 
-3. ✅ **External Interrupt(EXTI)** : This project uses an external interrupt(EXTI) trigger button, *naturally supporting low power consumption*. The project also provides a line of code to determine and enter a low-power interface.
+3. ✅ **External Interrupt(EXTI)** : This project uses an external interrupt(EXTI) trigger button, *naturally supporting [low power consumption](#low-power)*. The project also provides a line of code to determine and enter a low-power interface.
 
 4. ✅ **Asynchronous Processing** : The callback function is processed asynchronously to reduce the interrupt dwell time.
 
@@ -84,7 +104,7 @@
 
 ### Overview
 
-- As this project is a cross-platform one, all its interfaces are abstract, or in other words: all interfaces need to be customized by the user according to the chip being used. From this perspective, this project is merely a "half-finished product". If you prefer to use it directly out of the box, you can take a look at the customized version of the chip you need in the [Derivative Project](#derivative-project). If so, you can directly download it, skip step 1 and proceed directly to step 2.
+- As this project is a cross-platform one, all its interfaces are abstract, or in other words: all interfaces need to be customized by the user according to the chip being used. From this perspective, this project is merely a "half-finished product". If you prefer to use it directly out of the box, you can take a look at the customized version of the chip you need in the [Derivative Project](#derivative-project). If so, you can directly use the corresponding customized configuration file to skip step 1 and proceed directly to step 2.
 
 - **Step 1**: You need to customize the transformation for your chip(do step 1 in `simple_button_config.h`):
     - 1.1 - Add head file in **Head-File** at the beginning of the file `simple_button_config.h`.
@@ -104,6 +124,8 @@
 #### Step 1
 
 - **Derivative projects can skip "Step 1"**
+
+- See [config_guide](./docs/config_guide.md) for more details.
 
 1. Add head file in **Head-File** at the beginning of the file `simple_button_config.h`. The added header files depend on the specific chip. The following takes the HAL library of STM32F103C8T6 as an example:
 
@@ -160,7 +182,7 @@ typedef uint32_t            simpleButton_Type_EXTITrigger_t;
     /* for example: __WFI() */
 ```
 
-4. Implement the EXTI Initialization Function in the **Initialization-Function** at the beginning of the file `simple_button_config.h`. Here is an example of the STM32 HAL library:
+4. Implement the EXTI Initialization Function in the **Initialization-Function** at the beginning of the file `simple_button_config.h`. You need to complete the content of the `simpleButton_Private_InitEXTI()` function at the bottom of the file. It should include: enabling the GPIO clock, configuring the pull-up input; configuring the EXTI channel; and configuring the interrupt enable for the EXTI.
 
 ```c
 /** @b ================================================================ **/
@@ -168,124 +190,7 @@ typedef uint32_t            simpleButton_Type_EXTITrigger_t;
 
 /* This macro just forward the parameter to another function */
 #define SIMPLEBTN_FUNC_INIT_EXTI(GPIOX_Base, GPIO_Pin_X, EXTI_Trigger_X) \
-    simpleButton_Private_InitEXTI(GPIOX_Base, GPIO_Pin_X, EXTI_Trigger_X) // It is implemented below
-
-
-#if defined(__GNUC__) || defined(__clang__)
-    static inline __attribute__((always_inline))
-#elif defined(_MSC_VER) || defined(__CC_ARM)
-    static __forceinline
-#else
-    static inline
-#endif /* defined(__GNUC__) || defined(__clang__) */
-void simpleButton_Private_InitEXTI(
-    simpleButton_Type_GPIOBase_t    GPIOX_Base,
-    simpleButton_Type_GPIOPin_t     GPIO_Pin_X,
-    simpleButton_Type_EXTITrigger_t EXTI_Trigger_X
-) {
-    /* Initialize the AFIO Clock(F1xx) or SYSCFG Clock */
-#if defined(__HAL_RCC_AFIO_CLK_ENABLE)
-    __HAL_RCC_AFIO_CLK_ENABLE();
-#elif defined(__HAL_RCC_SYSCFG_CLK_ENABLE)
-    __HAL_RCC_SYSCFG_CLK_ENABLE();
-#else
- #warning Cannot find macro for AFIO or SYSCFG !
-#endif /* AFIO or SYSCFG */
-
-    /* Initialize the GPIOx Clock */
-    switch (GPIOX_Base) {
-    case GPIOA_BASE:
-        __HAL_RCC_GPIOA_CLK_ENABLE();
-        break;
-    case GPIOB_BASE:
-        __HAL_RCC_GPIOB_CLK_ENABLE();
-        break;
-    case GPIOC_BASE:
-        __HAL_RCC_GPIOC_CLK_ENABLE();
-        break;
-    case GPIOD_BASE:
-        __HAL_RCC_GPIOD_CLK_ENABLE();
-        break;
-    case GPIOE_BASE:
-        __HAL_RCC_GPIOE_CLK_ENABLE();
-        break;
-    default:
-        /* ... error handler ... */
-    }
-
-    /* Configure the GPIOx */
-    GPIO_InitTypeDef gpio_config;
-    gpio_config.Mode = (EXTI_Trigger_X == EXTI_TRIGGER_RISING)
-        ? (GPIO_MODE_IT_RISING) : (GPIO_MODE_IT_FALLING);
-    gpio_config.Pin = (uint32_t) GPIO_Pin_X;
-    gpio_config.Pull = (EXTI_Trigger_X == EXTI_TRIGGER_RISING)
-        ? (GPIO_PULLDOWN) : (GPIO_PULLUP);
-    gpio_config.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init((GPIO_TypeDef*)GPIOX_Base, &gpio_config);
-
-    /* Initialize the EXTI */
-    IRQn_Type the_exti_IRQ;
-    switch (GPIO_Pin_X) {
-    case GPIO_PIN_0:
-        the_exti_IRQ = EXTI0_IRQn;
-        break;
-    case GPIO_PIN_1:
-        the_exti_IRQ = EXTI1_IRQn;
-        break;
-    case GPIO_PIN_2:
-        the_exti_IRQ = EXTI2_IRQn;
-        break;
-    case GPIO_PIN_3:
-        the_exti_IRQ = EXTI3_IRQn;
-        break;
-    case GPIO_PIN_4:
-        the_exti_IRQ = EXTI4_IRQn;
-        break;
-    case GPIO_PIN_5:
-        the_exti_IRQ = EXTI9_5_IRQn;
-        break;
-    case GPIO_PIN_6:
-        the_exti_IRQ = EXTI9_5_IRQn;
-        break;
-    case GPIO_PIN_7:
-        the_exti_IRQ = EXTI9_5_IRQn;
-        break;
-    case GPIO_PIN_8:
-        the_exti_IRQ = EXTI9_5_IRQn;
-        break;
-    case GPIO_PIN_9:
-        the_exti_IRQ = EXTI9_5_IRQn;
-        break;
-    case GPIO_PIN_10:
-        the_exti_IRQ = EXTI15_10_IRQn;
-        break;
-    case GPIO_PIN_11:
-        the_exti_IRQ = EXTI15_10_IRQn;
-        break;
-    case GPIO_PIN_12:
-        the_exti_IRQ = EXTI15_10_IRQn;
-        break;
-    case GPIO_PIN_13:
-        the_exti_IRQ = EXTI15_10_IRQn;
-        break;
-    case GPIO_PIN_14:
-        the_exti_IRQ = EXTI15_10_IRQn;
-        break;
-    case GPIO_PIN_15:
-        the_exti_IRQ = EXTI15_10_IRQn;
-        break;
-    default:
-        /* ... error handler ... */
-
-    }
-    HAL_NVIC_SetPriority(
-        the_exti_IRQ, 
-        EXTI_PreemptionPriority, /* your priority */
-        EXTI_SubPriority /* your priority */
-    );
-    HAL_NVIC_EnableIRQ(the_exti_IRQ);
-
-}
+    simpleButton_Private_InitEXTI(GPIOX_Base, GPIO_Pin_X, EXTI_Trigger_X)
 ```
 
 #### Step 2
@@ -558,7 +463,7 @@ int main(void) {
 ### Button Combinations
 - Sometimes we want a combination of buttons to do something completely new. This is where **button combinations** come in.
 - Find `Mode-Set` in `CUSTOMIZATION` at the top of the file `simple_button_config.h`, Change `#define SIMPLEBTN_MODE_ENABLE_COMBINATION 0` to `#define SIMPLEBTN_MODE_ENABLE_COMBINATION 1 `to enable **button combinations**.
-- The button combination in this project is `predecessor button` + `successor(next) button`. The composite button's callback is bound to the `next button` and specifies its` previous button `at the` next button `. When the user presses the `next button` during the `previous button` press, the button combination callback function bound to the `next button` is triggered.
+- The button combination in this project is `predecessor button` + `successor(next) button`. The composite button's callback is bound to the `next button` and specifies its` previous button `at the` next button `. When the user presses the `next button` during the `previous button` press, the button combination callback function bound to the `next button` is triggered. (Using **SIMPLEBTN__CMBBTN_SETCALLBACK()** macro)
 - button combinations are in order. `button A + button B` is A different combination from `button B + button A`.
 - Neither the `predecessor` nor the `successor` button will trigger their short press, long press/timed long press/hold, double click/count multi-click callbacks **after the button combination fires**. (**But if the [keep-long-press](# keep-long-press) mode is enabled and the keep-long-press callback is triggered before the buttonstroke is triggered, the buttonstroke will not work!!**)
 - While composite button callbacks don't pass asynchronous handlers as arguments, **async handlers can't be missing**.
@@ -584,14 +489,14 @@ int main(void) {
     /* Configure composite buttons after initialization */
 
     // SB2 prepend SB1 and configure the SB1 --> SB2 combo callback
-    SimpleButton_SB2.Public.combinationConfig.previousButton = &SimpleButton_SB1;
-    SimpleButton_SB2.Public.combinationConfig.callBack = Cmb_SB1_then_SB2_CallBack;
+    SIMPLEBTN__CMBBTN_SETCALLBACK(SimpleButton_SB1, SimpleButton_SB2, Cmb_SB1_then_SB2_CallBack);
 
     // SB1 prepend SB2 and configure the SB2 --> SB1 combo callback
-    SimpleButton_SB1.Public.combinationConfig.previousButton = &SimpleButton_SB2;
-    SimpleButton_SB1.Public.combinationConfig.callBack = Cmb_SB2_then_SB1_CallBack;
+    SIMPLEBTN__CMBBTN_SETCALLBACK(SimpleButton_SB2, SimpleButton_SB1, Cmb_SB2_then_SB1_CallBack);
 
     while (1) {
+
+        // // asynchronousHandler cannot be omitted, even if all passed parameters are NULL.
         SimpleButton_SB1.Methods.asynchronousHandler(
             NULL,
             NULL,
@@ -764,18 +669,18 @@ stateDiagram-v2
 
 - `__WFI()` is undoubtedly the simplest function for entering low-power mode, but doing so may not yield the exact results one expects. Here are some suggestions for achieving low power consumption: 
 
-1. Before entering the low-power mode, it is recommended to configure all I/O as pull-up/pull-down inputs or analog inputs to prevent floating of the chip I/O and the generation of leakage current. [1]
+1. Before entering the low-power mode, it is recommended to configure all I/O as pull-up/pull-down inputs or analog inputs to prevent floating of the chip I/O and the generation of leakage current. <sup>[1](#ref-low-power-wch)</sup>
 
 
-2. For the small package type of chips, compared to the largest package, the unconnected pins should be configured as pull-up/pull-down inputs or analog inputs; otherwise, it may affect the current indicators. [1]
+2. For the small package type of chips, compared to the largest package, the unconnected pins should be configured as pull-up/pull-down inputs or analog inputs; otherwise, it may affect the current indicators. <sup>[1](#ref-low-power-wch)</sup>
 
 
-3. Release the SWD debugging interface and configure it as a GPIO function. It should be set as an input with pull-up/pull-down or as an analog input (the SWD function will be restored after wake-up). [1]
+3. Release the SWD debugging interface and configure it as a GPIO function. It should be set as an input with pull-up/pull-down or as an analog input (the SWD function will be restored after wake-up). <sup>[1](#ref-low-power-wch)</sup>
 
 
 4. It is recommended to completely turn off all unnecessary peripherals before entering the low-power mode. If conditions permit, disable the PLL switching to a lower-speed clock to save energy. 
 
-[1]: Refer to https://github.com/openwch/ch32_application_notes 
+<a id="ref-low-power-wch">[1]</a>: Refer to https://github.com/openwch/ch32_application_notes 
 
 5. Therefore, you may need to customize the `SIMPLEBTN_FUNC_START_LOW_POWER()` macro interface, which will be called by `SIMPLEBTN__START_LOWPOWER(...)`. The pseudo-code example is as follows:
 
@@ -862,11 +767,11 @@ int main(void) {
 
 ### STM32
 
-- [HAL-Kim-J-Smith/STM32-SimpleButton](https://github.com/Kim-J-Smith/STM32-SimpleButton)
+- [HAL-Kim-J-Smith/STM32-SimpleButton](/platform/stm32-hal/)
 
 ### CH32
 
-- [StandardLib-Kim-J-Smith/CH32-SimpleButton](https://github.com/Kim-J-Smith/CH32-SimpleButton)
+- [StandardLib-Kim-J-Smith/CH32-SimpleButton](/platform/ch32v/)
 
 
 [Back to Contents](#contents)

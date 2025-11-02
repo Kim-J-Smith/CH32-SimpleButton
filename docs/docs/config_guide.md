@@ -78,6 +78,11 @@ typedef uint32_t            simpleButton_Type_EXTITrigger_t;
    - This function is often implemented as `HAL_GetTick()` in STM32-HAL.
    - This function is called in all functions that need to obtain the timestamp, such as interrupt handling functions and asynchronous processing functions.
 
+2. `SIMPLEBTN_FUNC_GET_TICK_FromISR()`
+   - A dedicated function for obtaining the timestamp within the interrupt service routine.
+   - Usually, it is consistent with `SIMPLEBTN_FUNC_GET_TICK()`.
+   - If FreeRTOS is used, this macro should be defined as `xTaskGetTickCountFromISR()`.
+
 3. `SIMPLEBTN_FUNC_PANIC(Cause, ErrorNum, etc)`
    - This is a function that is only called in debug mode (when `SIMPLEBTN_MODE_ENABLE_DEBUG` is defined as 1).
    - This function is only called when an abnormal situation occurs in debug mode.

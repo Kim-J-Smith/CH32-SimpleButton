@@ -82,6 +82,11 @@ typedef uint32_t            simpleButton_Type_EXTITrigger_t;
     - 这个函数在STM32-HAL中常常被实现为`HAL_GetTick()`。
     - 这个函数在所有需要获取时间戳的函数，例如中断处理函数与异步处理函数中被调用。
 
+2. `SIMPLEBTN_FUNC_GET_TICK_FromISR()`
+    - 中断服务函数中专用的获取时间戳函数。
+    - 通常情况下与`SIMPLEBTN_FUNC_GET_TICK()`一致。
+    - 如果使用FreeRTOS，这个宏应该被定义为 `xTaskGetTickCountFromISR()`。
+
 3. `SIMPLEBTN_FUNC_PANIC(Cause, ErrorNum, etc)`
     - 这是一个仅在调试模式（`SIMPLEBTN_MODE_ENABLE_DEBUG`被定义为1时）中被调用的函数。
     - 只有在调试模式下发生异常情况时，该函数才会被调用。
